@@ -2,6 +2,10 @@
 Just some notes for my own personal development. This file will be deleted for
 good once the first release is made stable.
 
+## Process
+
+1. Hide and show hand basket.
+
 ## Current Installation Instructions
 1. Install ACF & Import the config file. May want figure out a way to do this
    using some sort of dependency config software. ACF fields declared in theme
@@ -63,3 +67,36 @@ Shipping
       /Stripe
       /PayPal
       /EasyPost
+
+## Thinking Through Products
+
+product
+  options
+    color
+    price
+    size
+      [sizes]
+    gender
+    dimensions
+    weight
+    other meta ( is this sold out, throw in shipping, etc. )
+
+
+example
+
+[ state I ]
+product A
+    Orange Black Taupe
+    S M L
+    Qty
+
+[ state II ]
+product A
+    Orange √Black Taupe
+    S M L
+    Qty
+
+add-to-cart
+
+
+parameters
