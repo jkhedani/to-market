@@ -2,6 +2,11 @@
 Just some notes for my own personal development. This file will be deleted for
 good once the first release is made stable.
 
+## Current Installation Instructions
+1. Install ACF & Import the config file. May want figure out a way to do this
+   using some sort of dependency config software. ACF fields declared in theme
+   is no bueno.
+
 ## Release To Dos
 - Ensure that products and settings are created and hidden upon
   installation and uninstall.
