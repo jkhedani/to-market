@@ -1,5 +1,5 @@
-# Our Shop
-Stripe + EasyPost + PayPal
+#   To Market
+### Stripe + EasyPost + PayPal
 A simple Wordpress shopping + checkout solution that doesn't require any fuss
 with e-commercey-bankey nonsense. Secure and safe right out of the box. Yes,
 PayPal gets to tag along because a large part of the world still pays with
@@ -15,8 +15,7 @@ plugins/add-ons/modules/whatever you want to reference them as:
 - [Advanced Custom Fields WP Plugin](http://www.advancedcustomfields.com/)
 
 ### Installation
-1. Coming soon!
+Coming soon!
 
 ### Updating
-1. Planning on implementing an update routine.
-2. Possibly thinking of using git submodules....
+Coming soon!
