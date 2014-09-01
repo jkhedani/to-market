@@ -74,29 +74,57 @@ product
   options
     color
     price
+    >>>
     size
       [sizes]
     gender
     dimensions
     weight
     other meta ( is this sold out, throw in shipping, etc. )
-
+    <<<
 
 example
 
 [ state I ]
 product A
-    Orange Black Taupe
-    S M L
+    Orange (soldout) Black Taupe
+    S M(soldout) L
     Qty
 
 [ state II ]
 product A
-    Orange √Black Taupe
-    S M L
+
+    product-option='color'
+    Orange (soldout) √ Black Taupe
+    product-option='size'
+    S M(soldout) L
+    product-option='qty'
     Qty
 
-add-to-cart
+[ state III ]
+product A
+
+    product-option='color'
+    Orange (soldout) √ Black Taupe
+    product-option='size'
+    S M(soldout) L
+    product-option='qty'
+    Qty
+
+add-to-cart data-color="black"
+
+# on the product page (PHP)
+  construct data attributes for add to cart
+
+# on product-option selection (JS)
 
 
-parameters
+# on add to basket selection (JS)
+  if all data attributes are not filled out, throw proper error
+  otherwise, collect data attributes, construct product and add to cart
+
+# additional parameters
+  if option is "sold" out
+    lower opacity or something
+
+# Removing options

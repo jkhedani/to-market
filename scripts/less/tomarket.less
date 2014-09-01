@@ -42,20 +42,16 @@ html body {
     margin-top: 5px;
   }
 
-  .hand-basket {
+  .popover.hand-basket {
     min-width: 100%;
     left: auto !important;
     top: 0 !important;
     right: 0 !important;
+    margin-top: -20px;
+    margin-right: 0;
   }
-  .shopping-cart-preview-legend {
-    display: none;
-  }
-  .shopping-cart-product {
-    .product-subtotal { display: none !important; }
-  }
+
   .hand-basket, .modal {
-    margin-top: 0;
     background: #FFF;
     border: none;
     z-index: 9999;
@@ -74,16 +70,18 @@ html body {
         text-transform: uppercase;
         text-decoration: underline;
       }
-      .shopping-cart-preview-legend {
-        .product-title { margin-left: 114px; }
-        .product-price { margin-left: 30px; }
-        .product-qty { margin-left: 30px; }
-        .product-subtotal { margin-left: 30px; }
-        .product-remove { margin-left: 25px; }
-      }
-      .shopping-cart-product {
+      .hand-basket-preview-legend {
         .clearfix();
-        //#font-family > .source-sans-pro;
+        span { float: left; margin-left: 25px; }
+        span.product-title { margin-left: 114px; }
+        span.product-remove { margin-left: 0; float: right; }
+        // .product-price { margin-left: 30px; }
+        // .product-qty { margin-left: 30px; }
+        // .product-subtotal { margin-left: 30px; }
+        // .product-remove { margin-left: 25px; }
+      }
+      .hand-basket-product {
+        .clearfix();
         font-size: 13px;
         color: #666;
         margin: 15px 0 0;
@@ -91,34 +89,35 @@ html body {
         border-bottom: 1px solid #F6F6F6;
         .product-preview { width: 105px; display: block; float: left; }
         .product-description {
-          width: 112px;
+          width: 96px;
           float: left;
-          .product-title { margin-left: 10px; display: block; }
-          .product-color { margin-left: 10px; display: block; }
+          margin-left: 10px;
         }
-        .product-price { margin-left: 22px; display: block; float: left; width: 59px; }
-        .product-qty { margin-left: 32px; display: block; float: left; width: 20px; text-align: center; }
-        .product-subtotal { margin-left: 32px; display: block; float: left; }
-        .product-remove { margin-left: 40px; display: block; float: left; }
+        .product-price, .product-qty, .product-subtotal { float: left; margin-left: 25px; }
+        .product-price { margin-left: 18px; display: block; width: 59px; text-align: center; }
+        .product-qty { margin-left: 25px; display: block; width: 20px; text-align: center; }
+        .product-subtotal { margin-left: 32px; display: block; text-align: center; }
 
         .product-meta-title { display: none; }
         .product-color { text-transform: capitalize; }
         a.btn {
-          &.remove {
+          &.remove-handbasket-item {
             background: none;
             border: none;
             color: #666;
             padding: 0;
+            float: right;
+            text-align: center;
             text-shadow: none;
             -moz-box-shadow: none;
             box-shadow: none;
-            width: 10px;
+            width: 50px;
             margin: -5px 0 0 53px;
             opacity: 0.7;
             &:hover { opacity: 1.0; }
           }
         }
-      } // .shopping-cart-product
+      } // .hand-basket-product
       .checkout-totals {
         float: right;
         width: 240px;
@@ -140,7 +139,6 @@ html body {
         text-transform: uppercase;
         margin: 0 auto 22px;
         color: #FFF;
-        //background-color: @mint;
         padding: 5px 45px;
         float: right;
         cursor: pointer;
@@ -162,26 +160,38 @@ html body {
 
 @media ( min-width: 768px ) { // and up
   html body {
-    .hand-basket {
+    .popover.hand-basket {
       //top: 94px !important;
       min-width: 565px;
       //padding: 0;
-      //margin-top: -3px;
-      //margin-right: 173px;
+      margin-top: -20px;
+      margin-right: 20px;
     }
   }
 }
 
-@media ( min-width: 200px ) and ( max-width: 500px ) {
+@media ( min-width: 500px ) {
+  html body {
+    .hand-basket-preview-legend {
+      display: block;
+    }
+    .hand-basket-product {
+      .product-subtotal { display: block !important; }
+    }
+  }
+}
+
+// For small devices, start hiding non-essential things things.
+@media ( min-width: 200px ) and ( max-width: 570px ) {
   html body {
     .hand-basket, .modal {
       .hand-basket-content, .checkoutReview {
-        .shopping-cart-product {
+        .hand-basket-product {
           .product-preview { width: 70px; }
           .product-description { width: 80px; margin-right: 0; }
           .product-qty { margin-left: 2px; }
-          a.btn.remove { margin-left: 20px; }
-        } // .shopping-cart-product
+          a.btn.remove-handbasket-item { margin-left: 20px; }
+        } // .hand-basket-product
         .checkout-totals { width: 100%; }
         .donation-promo-text { width: 100%; }
       }

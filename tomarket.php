@@ -33,6 +33,11 @@ function tomarket_enqueue_scripts() {
   // To Market Scripts & Styles
   wp_enqueue_style( 'to-market-styles', $path_to_plugin . '/scripts/css/tomarket.css' );
   wp_enqueue_script( 'to-market-scripts', $path_to_plugin . '/scripts/js/tomarket.js', array('jquery','json2') );
+  wp_localize_script( 'to-market-scripts', 'to_market_scripts', array(
+    'tax_rate' => get_field('tax_rate', 'option'),
+    'donation_promo_text' => get_field('donation_promo_text', 'option'),
+    'shipping_text' => get_field('shipping_text', 'option'),
+  ));
 
   // HandBasket
   wp_enqueue_script( 'simpleStorage-script', $path_to_plugin . '/scripts/js/simpleStorage.js', array('jquery','json2') );

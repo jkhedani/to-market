@@ -18,21 +18,16 @@ html body [data-toggle="hand-basket"] {
   text-indent: -9999px;
   margin-top: 5px;
 }
-html body .hand-basket {
+html body .popover.hand-basket {
   min-width: 100%;
   left: auto !important;
   top: 0 !important;
   right: 0 !important;
-}
-html body .shopping-cart-preview-legend {
-  display: none;
-}
-html body .shopping-cart-product .product-subtotal {
-  display: none !important;
+  margin-top: -20px;
+  margin-right: 0;
 }
 html body .hand-basket,
 html body .modal {
-  margin-top: 0;
   background: #FFF;
   border: none;
   z-index: 9999;
@@ -62,158 +57,160 @@ html body .modal .checkoutReview h1 {
   text-transform: uppercase;
   text-decoration: underline;
 }
-html body .hand-basket .hand-basket-content .shopping-cart-preview-legend .product-title,
-html body .modal .hand-basket-content .shopping-cart-preview-legend .product-title,
-html body .hand-basket .checkoutReview .shopping-cart-preview-legend .product-title,
-html body .modal .checkoutReview .shopping-cart-preview-legend .product-title {
-  margin-left: 114px;
+html body .hand-basket .hand-basket-content .hand-basket-preview-legend:before,
+html body .modal .hand-basket-content .hand-basket-preview-legend:before,
+html body .hand-basket .checkoutReview .hand-basket-preview-legend:before,
+html body .modal .checkoutReview .hand-basket-preview-legend:before,
+html body .hand-basket .hand-basket-content .hand-basket-preview-legend:after,
+html body .modal .hand-basket-content .hand-basket-preview-legend:after,
+html body .hand-basket .checkoutReview .hand-basket-preview-legend:after,
+html body .modal .checkoutReview .hand-basket-preview-legend:after {
+  content: " ";
+  display: table;
 }
-html body .hand-basket .hand-basket-content .shopping-cart-preview-legend .product-price,
-html body .modal .hand-basket-content .shopping-cart-preview-legend .product-price,
-html body .hand-basket .checkoutReview .shopping-cart-preview-legend .product-price,
-html body .modal .checkoutReview .shopping-cart-preview-legend .product-price {
-  margin-left: 30px;
+html body .hand-basket .hand-basket-content .hand-basket-preview-legend:after,
+html body .modal .hand-basket-content .hand-basket-preview-legend:after,
+html body .hand-basket .checkoutReview .hand-basket-preview-legend:after,
+html body .modal .checkoutReview .hand-basket-preview-legend:after {
+  clear: both;
 }
-html body .hand-basket .hand-basket-content .shopping-cart-preview-legend .product-qty,
-html body .modal .hand-basket-content .shopping-cart-preview-legend .product-qty,
-html body .hand-basket .checkoutReview .shopping-cart-preview-legend .product-qty,
-html body .modal .checkoutReview .shopping-cart-preview-legend .product-qty {
-  margin-left: 30px;
-}
-html body .hand-basket .hand-basket-content .shopping-cart-preview-legend .product-subtotal,
-html body .modal .hand-basket-content .shopping-cart-preview-legend .product-subtotal,
-html body .hand-basket .checkoutReview .shopping-cart-preview-legend .product-subtotal,
-html body .modal .checkoutReview .shopping-cart-preview-legend .product-subtotal {
-  margin-left: 30px;
-}
-html body .hand-basket .hand-basket-content .shopping-cart-preview-legend .product-remove,
-html body .modal .hand-basket-content .shopping-cart-preview-legend .product-remove,
-html body .hand-basket .checkoutReview .shopping-cart-preview-legend .product-remove,
-html body .modal .checkoutReview .shopping-cart-preview-legend .product-remove {
+html body .hand-basket .hand-basket-content .hand-basket-preview-legend span,
+html body .modal .hand-basket-content .hand-basket-preview-legend span,
+html body .hand-basket .checkoutReview .hand-basket-preview-legend span,
+html body .modal .checkoutReview .hand-basket-preview-legend span {
+  float: left;
   margin-left: 25px;
 }
-html body .hand-basket .hand-basket-content .shopping-cart-product,
-html body .modal .hand-basket-content .shopping-cart-product,
-html body .hand-basket .checkoutReview .shopping-cart-product,
-html body .modal .checkoutReview .shopping-cart-product {
+html body .hand-basket .hand-basket-content .hand-basket-preview-legend span.product-title,
+html body .modal .hand-basket-content .hand-basket-preview-legend span.product-title,
+html body .hand-basket .checkoutReview .hand-basket-preview-legend span.product-title,
+html body .modal .checkoutReview .hand-basket-preview-legend span.product-title {
+  margin-left: 114px;
+}
+html body .hand-basket .hand-basket-content .hand-basket-preview-legend span.product-remove,
+html body .modal .hand-basket-content .hand-basket-preview-legend span.product-remove,
+html body .hand-basket .checkoutReview .hand-basket-preview-legend span.product-remove,
+html body .modal .checkoutReview .hand-basket-preview-legend span.product-remove {
+  margin-left: 0;
+  float: right;
+}
+html body .hand-basket .hand-basket-content .hand-basket-product,
+html body .modal .hand-basket-content .hand-basket-product,
+html body .hand-basket .checkoutReview .hand-basket-product,
+html body .modal .checkoutReview .hand-basket-product {
   font-size: 13px;
   color: #666;
   margin: 15px 0 0;
   padding-bottom: 20px;
   border-bottom: 1px solid #F6F6F6;
 }
-html body .hand-basket .hand-basket-content .shopping-cart-product:before,
-html body .modal .hand-basket-content .shopping-cart-product:before,
-html body .hand-basket .checkoutReview .shopping-cart-product:before,
-html body .modal .checkoutReview .shopping-cart-product:before,
-html body .hand-basket .hand-basket-content .shopping-cart-product:after,
-html body .modal .hand-basket-content .shopping-cart-product:after,
-html body .hand-basket .checkoutReview .shopping-cart-product:after,
-html body .modal .checkoutReview .shopping-cart-product:after {
+html body .hand-basket .hand-basket-content .hand-basket-product:before,
+html body .modal .hand-basket-content .hand-basket-product:before,
+html body .hand-basket .checkoutReview .hand-basket-product:before,
+html body .modal .checkoutReview .hand-basket-product:before,
+html body .hand-basket .hand-basket-content .hand-basket-product:after,
+html body .modal .hand-basket-content .hand-basket-product:after,
+html body .hand-basket .checkoutReview .hand-basket-product:after,
+html body .modal .checkoutReview .hand-basket-product:after {
   content: " ";
   display: table;
 }
-html body .hand-basket .hand-basket-content .shopping-cart-product:after,
-html body .modal .hand-basket-content .shopping-cart-product:after,
-html body .hand-basket .checkoutReview .shopping-cart-product:after,
-html body .modal .checkoutReview .shopping-cart-product:after {
+html body .hand-basket .hand-basket-content .hand-basket-product:after,
+html body .modal .hand-basket-content .hand-basket-product:after,
+html body .hand-basket .checkoutReview .hand-basket-product:after,
+html body .modal .checkoutReview .hand-basket-product:after {
   clear: both;
 }
-html body .hand-basket .hand-basket-content .shopping-cart-product .product-preview,
-html body .modal .hand-basket-content .shopping-cart-product .product-preview,
-html body .hand-basket .checkoutReview .shopping-cart-product .product-preview,
-html body .modal .checkoutReview .shopping-cart-product .product-preview {
+html body .hand-basket .hand-basket-content .hand-basket-product .product-preview,
+html body .modal .hand-basket-content .hand-basket-product .product-preview,
+html body .hand-basket .checkoutReview .hand-basket-product .product-preview,
+html body .modal .checkoutReview .hand-basket-product .product-preview {
   width: 105px;
   display: block;
   float: left;
 }
-html body .hand-basket .hand-basket-content .shopping-cart-product .product-description,
-html body .modal .hand-basket-content .shopping-cart-product .product-description,
-html body .hand-basket .checkoutReview .shopping-cart-product .product-description,
-html body .modal .checkoutReview .shopping-cart-product .product-description {
-  width: 112px;
+html body .hand-basket .hand-basket-content .hand-basket-product .product-description,
+html body .modal .hand-basket-content .hand-basket-product .product-description,
+html body .hand-basket .checkoutReview .hand-basket-product .product-description,
+html body .modal .checkoutReview .hand-basket-product .product-description {
+  width: 96px;
   float: left;
-}
-html body .hand-basket .hand-basket-content .shopping-cart-product .product-description .product-title,
-html body .modal .hand-basket-content .shopping-cart-product .product-description .product-title,
-html body .hand-basket .checkoutReview .shopping-cart-product .product-description .product-title,
-html body .modal .checkoutReview .shopping-cart-product .product-description .product-title {
   margin-left: 10px;
-  display: block;
 }
-html body .hand-basket .hand-basket-content .shopping-cart-product .product-description .product-color,
-html body .modal .hand-basket-content .shopping-cart-product .product-description .product-color,
-html body .hand-basket .checkoutReview .shopping-cart-product .product-description .product-color,
-html body .modal .checkoutReview .shopping-cart-product .product-description .product-color {
-  margin-left: 10px;
-  display: block;
-}
-html body .hand-basket .hand-basket-content .shopping-cart-product .product-price,
-html body .modal .hand-basket-content .shopping-cart-product .product-price,
-html body .hand-basket .checkoutReview .shopping-cart-product .product-price,
-html body .modal .checkoutReview .shopping-cart-product .product-price {
-  margin-left: 22px;
-  display: block;
+html body .hand-basket .hand-basket-content .hand-basket-product .product-price,
+html body .modal .hand-basket-content .hand-basket-product .product-price,
+html body .hand-basket .checkoutReview .hand-basket-product .product-price,
+html body .modal .checkoutReview .hand-basket-product .product-price,
+html body .hand-basket .hand-basket-content .hand-basket-product .product-qty,
+html body .modal .hand-basket-content .hand-basket-product .product-qty,
+html body .hand-basket .checkoutReview .hand-basket-product .product-qty,
+html body .modal .checkoutReview .hand-basket-product .product-qty,
+html body .hand-basket .hand-basket-content .hand-basket-product .product-subtotal,
+html body .modal .hand-basket-content .hand-basket-product .product-subtotal,
+html body .hand-basket .checkoutReview .hand-basket-product .product-subtotal,
+html body .modal .checkoutReview .hand-basket-product .product-subtotal {
   float: left;
+  margin-left: 25px;
+}
+html body .hand-basket .hand-basket-content .hand-basket-product .product-price,
+html body .modal .hand-basket-content .hand-basket-product .product-price,
+html body .hand-basket .checkoutReview .hand-basket-product .product-price,
+html body .modal .checkoutReview .hand-basket-product .product-price {
+  margin-left: 18px;
+  display: block;
   width: 59px;
+  text-align: center;
 }
-html body .hand-basket .hand-basket-content .shopping-cart-product .product-qty,
-html body .modal .hand-basket-content .shopping-cart-product .product-qty,
-html body .hand-basket .checkoutReview .shopping-cart-product .product-qty,
-html body .modal .checkoutReview .shopping-cart-product .product-qty {
-  margin-left: 32px;
+html body .hand-basket .hand-basket-content .hand-basket-product .product-qty,
+html body .modal .hand-basket-content .hand-basket-product .product-qty,
+html body .hand-basket .checkoutReview .hand-basket-product .product-qty,
+html body .modal .checkoutReview .hand-basket-product .product-qty {
+  margin-left: 25px;
   display: block;
-  float: left;
   width: 20px;
   text-align: center;
 }
-html body .hand-basket .hand-basket-content .shopping-cart-product .product-subtotal,
-html body .modal .hand-basket-content .shopping-cart-product .product-subtotal,
-html body .hand-basket .checkoutReview .shopping-cart-product .product-subtotal,
-html body .modal .checkoutReview .shopping-cart-product .product-subtotal {
+html body .hand-basket .hand-basket-content .hand-basket-product .product-subtotal,
+html body .modal .hand-basket-content .hand-basket-product .product-subtotal,
+html body .hand-basket .checkoutReview .hand-basket-product .product-subtotal,
+html body .modal .checkoutReview .hand-basket-product .product-subtotal {
   margin-left: 32px;
   display: block;
-  float: left;
+  text-align: center;
 }
-html body .hand-basket .hand-basket-content .shopping-cart-product .product-remove,
-html body .modal .hand-basket-content .shopping-cart-product .product-remove,
-html body .hand-basket .checkoutReview .shopping-cart-product .product-remove,
-html body .modal .checkoutReview .shopping-cart-product .product-remove {
-  margin-left: 40px;
-  display: block;
-  float: left;
-}
-html body .hand-basket .hand-basket-content .shopping-cart-product .product-meta-title,
-html body .modal .hand-basket-content .shopping-cart-product .product-meta-title,
-html body .hand-basket .checkoutReview .shopping-cart-product .product-meta-title,
-html body .modal .checkoutReview .shopping-cart-product .product-meta-title {
+html body .hand-basket .hand-basket-content .hand-basket-product .product-meta-title,
+html body .modal .hand-basket-content .hand-basket-product .product-meta-title,
+html body .hand-basket .checkoutReview .hand-basket-product .product-meta-title,
+html body .modal .checkoutReview .hand-basket-product .product-meta-title {
   display: none;
 }
-html body .hand-basket .hand-basket-content .shopping-cart-product .product-color,
-html body .modal .hand-basket-content .shopping-cart-product .product-color,
-html body .hand-basket .checkoutReview .shopping-cart-product .product-color,
-html body .modal .checkoutReview .shopping-cart-product .product-color {
+html body .hand-basket .hand-basket-content .hand-basket-product .product-color,
+html body .modal .hand-basket-content .hand-basket-product .product-color,
+html body .hand-basket .checkoutReview .hand-basket-product .product-color,
+html body .modal .checkoutReview .hand-basket-product .product-color {
   text-transform: capitalize;
 }
-html body .hand-basket .hand-basket-content .shopping-cart-product a.btn.remove,
-html body .modal .hand-basket-content .shopping-cart-product a.btn.remove,
-html body .hand-basket .checkoutReview .shopping-cart-product a.btn.remove,
-html body .modal .checkoutReview .shopping-cart-product a.btn.remove {
+html body .hand-basket .hand-basket-content .hand-basket-product a.btn.remove-handbasket-item,
+html body .modal .hand-basket-content .hand-basket-product a.btn.remove-handbasket-item,
+html body .hand-basket .checkoutReview .hand-basket-product a.btn.remove-handbasket-item,
+html body .modal .checkoutReview .hand-basket-product a.btn.remove-handbasket-item {
   background: none;
   border: none;
   color: #666;
   padding: 0;
+  float: right;
+  text-align: center;
   text-shadow: none;
   -moz-box-shadow: none;
   box-shadow: none;
-  width: 10px;
+  width: 50px;
   margin: -5px 0 0 53px;
   opacity: 0.7;
 }
-html body .hand-basket .hand-basket-content .shopping-cart-product a.btn.remove:hover,
-html body .modal .hand-basket-content .shopping-cart-product a.btn.remove:hover,
-html body .hand-basket .checkoutReview .shopping-cart-product a.btn.remove:hover,
-html body .modal .checkoutReview .shopping-cart-product a.btn.remove:hover {
+html body .hand-basket .hand-basket-content .hand-basket-product a.btn.remove-handbasket-item:hover,
+html body .modal .hand-basket-content .hand-basket-product a.btn.remove-handbasket-item:hover,
+html body .hand-basket .checkoutReview .hand-basket-product a.btn.remove-handbasket-item:hover,
+html body .modal .checkoutReview .hand-basket-product a.btn.remove-handbasket-item:hover {
   opacity: 1.0;
 }
 html body .hand-basket .hand-basket-content .checkout-totals,
@@ -322,34 +319,44 @@ html body .modal .checkoutReview {
   
 }
 @media (min-width: 768px) {
-  html body .hand-basket {
+  html body .popover.hand-basket {
     min-width: 565px;
+    margin-top: -20px;
+    margin-right: 20px;
   }
 }
-@media (min-width: 200px) and (max-width: 500px) {
-  html body .hand-basket .hand-basket-content .shopping-cart-product .product-preview,
-  html body .modal .hand-basket-content .shopping-cart-product .product-preview,
-  html body .hand-basket .checkoutReview .shopping-cart-product .product-preview,
-  html body .modal .checkoutReview .shopping-cart-product .product-preview {
+@media (min-width: 500px) {
+  html body .hand-basket-preview-legend {
+    display: block;
+  }
+  html body .hand-basket-product .product-subtotal {
+    display: block !important;
+  }
+}
+@media (min-width: 200px) and (max-width: 570px) {
+  html body .hand-basket .hand-basket-content .hand-basket-product .product-preview,
+  html body .modal .hand-basket-content .hand-basket-product .product-preview,
+  html body .hand-basket .checkoutReview .hand-basket-product .product-preview,
+  html body .modal .checkoutReview .hand-basket-product .product-preview {
     width: 70px;
   }
-  html body .hand-basket .hand-basket-content .shopping-cart-product .product-description,
-  html body .modal .hand-basket-content .shopping-cart-product .product-description,
-  html body .hand-basket .checkoutReview .shopping-cart-product .product-description,
-  html body .modal .checkoutReview .shopping-cart-product .product-description {
+  html body .hand-basket .hand-basket-content .hand-basket-product .product-description,
+  html body .modal .hand-basket-content .hand-basket-product .product-description,
+  html body .hand-basket .checkoutReview .hand-basket-product .product-description,
+  html body .modal .checkoutReview .hand-basket-product .product-description {
     width: 80px;
     margin-right: 0;
   }
-  html body .hand-basket .hand-basket-content .shopping-cart-product .product-qty,
-  html body .modal .hand-basket-content .shopping-cart-product .product-qty,
-  html body .hand-basket .checkoutReview .shopping-cart-product .product-qty,
-  html body .modal .checkoutReview .shopping-cart-product .product-qty {
+  html body .hand-basket .hand-basket-content .hand-basket-product .product-qty,
+  html body .modal .hand-basket-content .hand-basket-product .product-qty,
+  html body .hand-basket .checkoutReview .hand-basket-product .product-qty,
+  html body .modal .checkoutReview .hand-basket-product .product-qty {
     margin-left: 2px;
   }
-  html body .hand-basket .hand-basket-content .shopping-cart-product a.btn.remove,
-  html body .modal .hand-basket-content .shopping-cart-product a.btn.remove,
-  html body .hand-basket .checkoutReview .shopping-cart-product a.btn.remove,
-  html body .modal .checkoutReview .shopping-cart-product a.btn.remove {
+  html body .hand-basket .hand-basket-content .hand-basket-product a.btn.remove-handbasket-item,
+  html body .modal .hand-basket-content .hand-basket-product a.btn.remove-handbasket-item,
+  html body .hand-basket .checkoutReview .hand-basket-product a.btn.remove-handbasket-item,
+  html body .modal .checkoutReview .hand-basket-product a.btn.remove-handbasket-item {
     margin-left: 20px;
   }
   html body .hand-basket .hand-basket-content .checkout-totals,
