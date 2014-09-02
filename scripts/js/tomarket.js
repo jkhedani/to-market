@@ -56,16 +56,13 @@ jQuery( document ).ready( function($) {
 	//   This function doesn't display the basket but rather
 	//   it constructs the basket to be shown using stored
 	//   local data.
-	var refresh_handbasket = function() {
+	var refresh_handbasket = function( type ) {
 		var handbasket_items = "";
 		var handbasket_subtotal = 0
 		// # Check if we have any products in our basket.
 		if ( simpleStorage.index().length < 1 ) {
 			var handbasket_items = "<h1>Shopping Cart</h1><p>Your shopping cart is currently empty.</p>"; // Load empty basket
 		} else {
-
-			// Place "legend" in the hand basket (gets overwritten if in template)
-			handbasket_items = handbasket_items + "<h1>Shopping Cart</h1><div class='hand-basket-preview-legend'><span class='product-title'>Product Name</span><span class='product-price'>Unit Price</span><span class='product-qty'>Qty</span><span class='product-subtotal'>Subtotal</span><span class='product-remove'>Remove</span></div>";
 
 			// Retrieve each existing product from the basket
 			var handbasket_item_keys = simpleStorage.index();
@@ -100,18 +97,32 @@ jQuery( document ).ready( function($) {
 			handbasket_items += '</div>';
 			handbasket_items += '<hr />';
 			handbasket_items += '<span class="donation-promo-text">'+to_market_scripts.donation_promo_text+'</span>';
-			handbasket_items += '<a class="checkout">Checkout</a>';
+			handbasket_items += '<a class="checkout" data-toggle="checkout" data-target="#checkout">Checkout</a>';
 		} // handbasket_has_items check
 
-		// # Generate hand basket in #primary container
-		$('[data-toggle="hand-basket"]').popover({
-			'html'			: true,
-			'placement' : 'bottom',
-			'trigger'   : 'manual',
-			'container' : '#primary',
-			'content'   : handbasket_items,
-			'template'  : "<div class='popover hand-basket' role='tooltip'><div class='arrow'></div><div class='popover-content hand-basket-content'></div></div>",
-		});
+		// # Determine which type of hand basket we are going to generate
+		// a = typeof a !== 'undefined' ? a : 42;
+		type = typeof type !== 'undefined' ? type : 'popover';
+
+		// # Primary function of popver is of the shopping cart
+		if ( type === 'popover' ) {
+
+			// Prepend "legend" and title in the hand basket (gets overwritten if in template)
+			handbasket_items = "<h1>Shopping Cart</h1><div class='hand-basket-preview-legend'><span class='product-title'>Product Name</span><span class='product-price'>Unit Price</span><span class='product-qty'>Qty</span><span class='product-subtotal'>Subtotal</span><span class='product-remove'>Remove</span></div>" + handbasket_items;
+
+			$('[data-toggle="hand-basket"]').popover({
+				'html'			: true,
+				'placement' : 'bottom',
+				'trigger'   : 'manual',
+				'container' : '#primary',
+				'content'   : handbasket_items,
+				'template'  : "<div class='popover hand-basket' role='tooltip'><div class='arrow'></div><div class='popover-content hand-basket-content'></div></div>",
+			});
+
+		// # Return just the basket items (no wrapper)
+		} else if ( type === 'raw' ) {
+			return handbasket_items;
+		}
 
 	}
 
@@ -191,6 +202,136 @@ jQuery( document ).ready( function($) {
 	 * Checkout
 	 * Requires: jQuery, BootstrapJS (Modal)
 	 */
+
+	// # Checkout Testing Parameters
+	// @param indicate which steps require input
+	var allow_dev_inputs = true;
+	function insert_dev_inputs ( steps ) {
+		// Step "Basic"
+		function input_step_basic_dev_data() {
+			$('input[name="customer-name"]').val('Justin Hedani');
+			$('input[name="customer-email"]').val('jkhedani@gmail.com');
+			$('input[data-stripe="address-line1"]').val('3927 Koko Drive');
+			$('input[data-stripe="address-city"]').val('Honolulu');
+			$('input[data-stripe="address-zipcode"]').val('96816');
+			$('input[data-stripe="address-state"]').val('HI');
+			$('input[data-stripe="address-country"]').val('USA');
+		}
+		// Step "Payment"
+		function input_step_payment_dev_data() {
+			$('input[data-stripe="name"]').val('Justin Hedani');
+			$('input[data-stripe="number"]').val('4242424242424242');
+			$('input[data-stripe="cvc"]').val('123');
+			$('input[data-stripe="exp-month"]').val('09');
+			$('input[data-stripe="exp-year"]').val('16');
+		}
+		// # Determine which steps to add input data to
+		if ( steps === "all" ) {
+			input_step_basic_dev_data();
+			input_step_payment_dev_data();
+		}
+	}
+	if ( allow_dev_inputs = true ) {
+		$(document).on( 'show.bs.modal', '#checkout', function() {
+			insert_dev_inputs( 'all' );
+		});
+	}
+
+	// # Get URL variables
+	// 	 http://css-tricks.com/snippets/javascript/get-url-variables/
+	function get_query_variable(variable) {
+     var query = window.location.search.substring(1); // everything after(?)
+     var vars = query.split("&");
+     for (var i=0;i<vars.length;i++) {
+       var pair = vars[i].split("=");
+       if(pair[0] == variable){return pair[1];}
+     }
+     return(false);
+	}
+
+	/**
+	 * Checkout Event Listeners
+   */
+
+	// # Allow tabbed interface through checkout
+	$(document).on('click', '.checkout-tab', function() {
+		// Remove current class from all tabs
+		$('.checkout-tabs a').removeClass('current');
+		// Make clicked tab current
+		$(this).addClass('current');
+		// Hide current step, target and show desired step.
+		var target_step = $(this).data('target');
+		$('#checkout .checkout-step').hide();
+		$('#checkout [data-step="'+target_step+'"]').show();
+		return false;
+	});
+
+
+	$(document).on( 'show.bs.modal', '#checkout', function() {
+		// SHOW Appropriate Step Determined by Hash
+		var step_to_show = window.location.hash;
+		console.log(step_to_show);
+		$(document).find('#checkout .checkout-tabs a[href="'+step_to_show+'"]').click();
+	});
+
+
+
+	// # Create Checkout
+	//	 It seems that the modal should probably be called last
+	//	 or at least before all the event listners
+	$('#checkout').modal({ backdrop : false, show : false, });
+
+	// # Show checkout via URL query
+	if ( get_query_variable('checkout') === 'yes' ) {
+		$('#checkout').modal('show');
+	}
+
+	// # Show checkout via click event
+	$(document).on('click', '[data-toggle="checkout"]', function() {
+		$('#checkout').modal('show');
+	});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	// SHOW
+	// # Allow stepping through checkout by hashbanging
+	// http://stackoverflow.com/questions/298503/how-can-you-check-for-a-hash-in-a-url-using-javascript
+	$(document).on( 'show.bs.modal', '#checkout', function() {
+		// ADD Hand Basket Items to Cart
+		var handbasket_items = refresh_handbasket('raw');
+		$(document).find('#review.checkout-step .modal-body').append( handbasket_items );
+
+	});
+
+	// SHOWN
+	// # Prevent page scrolling when modal is present
+	$(document).on( 'shown.bs.modal', '#checkout', function() {
+		$('html').css( 'overflow', 'hidden' );
+		$('html').addClass('fixed');
+	});
+
+	// HIDDEN
+	$(document).on( 'hidden.bs.modal', '#checkout', function() {
+		$('html').css( 'overflow-y', 'scroll' );
+		$('html').removeClass('fixed');
+	});
+
+
 
 }); // jQuery
 

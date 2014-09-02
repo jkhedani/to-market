@@ -47,8 +47,7 @@ function tomarket_enqueue_scripts() {
     'nonce' => wp_create_nonce('handbasket_scripts_nonce')
   ));
 
-  // // Stripe
-  // global $stripe_options;
+  // Stripe
   // if ( isset($stripe_options['test_mode']) && $stripe_options['test_mode'] ) {
   //     $publishable = $stripe_options['test_publishable_key']; // Use Test API Key for Stripe Processing
   // } else {
@@ -58,7 +57,7 @@ function tomarket_enqueue_scripts() {
   // wp_localize_script('stripe-processing', 'stripe_vars', array(
   //     'publishable_key' => $publishable,
   // ));
-  //
+
   // // PayPal
   // wp_enqueue_script('paypal-scripts', get_stylesheet_directory_uri().'/lib/PayPal/payments/paypal-payment-scripts.js', array('jquery','json2'), true);
   // wp_localize_script('paypal-scripts', 'paypal_data', array(
@@ -107,6 +106,150 @@ require_once( __DIR__ . '/lib/ToMarket/Util.php');
  * Hand Basket Functions
  */
 
+/**
+ * Checkout Functions
+ */
+function render_checkout() {
+  $checkout = '
+
+  <div class="modal fade" id="checkout" tabindex="-1" role="dialog" aria-labelledby="checkout" aria-hidden="true" data-backdrop="static">
+    <div class="checkout-header">
+      <a class="site-title" href="'.home_url( '/' ).'" title="'. esc_attr( get_bloginfo( 'name', 'display' ) ) .'" rel="home">'.get_bloginfo( 'name' ).'</a>
+      <!-- <button type="button" class="close" data-dismiss="modal" aria-hidden="true">X</button> -->
+
+      <ul class="checkout-tabs">
+        <li><a href="#basic" class="checkout-tab current" data-target="1"><i class="fa fa-home"></i></a></li>
+        <li><a href="#payment" class="checkout-tab complete" data-target="2"><i class="fa fa-credit-card"></i></a></li>
+        <li><a href="#review" class="checkout-tab" data-target="3"><i class="fa fa-check-square-o"></i></a></li>
+      </ul>
+    </div>
+
+    <!-- Step 1: Basic Information -->
+    <div id="basic" class="checkout-step" data-step="1">
+      <div class="modal-header">
+        <h3 class="checkout-step-title">'. __('Basic Information','litton_bags') .'</h3>
+      </div>
+      <div class="modal-body">
+
+        <div class="form-row checkoutBasic basic-info" id="basic-info" >
+          <legend>Basic Information</legend>
+          <label>'. __('Full Name', 'litton_bags') .'</label>
+          <input type="text" size="20" autocomplete="off" name="customer-name" />
+          <label>'. __('Email Address', 'litton_bags') .'</label>
+          <input type="text" size="20" autocomplete="off" class="email" name="customer-email" />
+        </div>
+        <div class="form-row checkoutBasic basic-info" id="addr-info">
+          <legend>Billing Address</legend>
+          <label>'. __('Address Line 1', 'litton_bags') .'</label>
+          <input type="text" size="20" autocomplete="off" data-stripe="address-line1" class="address" />
+          <label>'. __('Address Line 2', 'litton_bags') .'</label>
+          <input type="text" size="20" autocomplete="off" data-stripe="address-line2" class="optional address" />
+          <div class="form-row-single">
+          <div>
+          <label>'. __('City', 'litton_bags') .'</label>
+          <input type="text" size="20" autocomplete="off" data-stripe="address-city" />
+          </div>
+          <div>
+          <label>'. __('Zip Code', 'litton_bags') .'</label>
+          <input type="text" size="20" autocomplete="off" class="zip-code" data-stripe="address-zip" />
+          </div>
+          <div>
+          <label>'. __('State', 'litton_bags') .'</label>
+          <input type="text" size="20" autocomplete="off" class="state" data-stripe="address-state" />
+          </div>
+          <div>
+          <label>'. __('Country', 'litton_bags') .'</label>
+          <input type="text" size="20" autocomplete="off" class="country" data-stripe="address-country" />
+          </div>
+          </div>
+          <p class="formHelperText">Currently, we are only shipping to the United States on our website. Please email us for international purchases.</p>
+        </div>
+
+        <input id="shippingIsDifferent" type="checkbox" />
+        <span class="formHelperText">My shipping address is different from my billing address.</span>
+
+        <div class="form-row basic-info shipping-info hide" id="addr-info-shipping">
+          <legend>Shipping Address</legend>
+          <label>'. __('Address Line 1', 'litton_bags') .'</label>
+          <input type="text" size="20" autocomplete="off" data-easypost="shipping-address-line1" name="shipping-address-line1" class="address" />
+          <label>'. __('Address Line 2', 'litton_bags') .'</label>
+          <input type="text" size="20" autocomplete="off" data-easypost="shipping-address-line2" name="shipping-address-line2" class="address optional" />
+          <div class="form-row-single">
+          <div>
+          <label>'. __('City', 'litton_bags') .'</label>
+          <input type="text" size="20" autocomplete="off" data-easypost="shipping-address-city" name="shipping-address-city" />
+          </div>
+          <div>
+          <label>'. __('State', 'litton_bags') .'</label>
+          <input type="text" size="20" autocomplete="off" class="state" data-easypost="shipping-address-state" name="shipping-address-state" />
+          </div>
+          <div>
+          <label>'. __('Zip Code', 'litton_bags') .'</label>
+          <input type="text" size="20" autocomplete="off" class="zip-code" data-easypost="shipping-address-zip" name="shipping-address-zip" />
+          </div>
+          <div>
+          <label>'. __('Country', 'litton_bags') .'</label>
+          <input type="text" size="20" autocomplete="off" class="country" data-easypost="shipping-address-country" name="shipping-address-country" />
+          </div>
+          </div>
+        </div>
+
+      </div><!-- .modal-body -->
+      <div class="checkout-footer">
+        <a href="#">Payment</a>
+      </div>
+    </div><!-- end step 1 -->
+
+    <!-- Step Two: Payment Info -->
+    <div id="payment" class="checkout-step" data-step="2">
+      <div class="modal-header">
+        <h3 class="checkout-step-title">'. __('Payment Information','litton_bags') .'</h3>
+      </div>
+      <div class="modal-body">
+
+        <legend>Card Information</legend>
+          <ul class="cc-icons">
+            <li><div class="cc-icon visa"></div></li>
+            <li><div class="cc-icon mastercard"></div></li>
+            <li><div class="cc-icon amex"></div></li>
+            <li><div class="cc-icon discover"></div></li>
+            <li><div class="cc-icon jcb"></div></li>
+          </ul>
+          <label>'. __('Name on Card', 'litton_bags') .'</label>
+          <input type="text" size="20" autocomplete="off" data-stripe="name" />
+          <label>'. __('Card Number', 'litton_bags') .'</label>
+          <input type="text" size="20" autocomplete="off" class="cc-num" data-stripe="number" />
+          <label>'. __('CVC', 'litton_bags') .'</label>
+          <input type="text" size="4" autocomplete="off" class="cc-cvc" data-stripe="cvc" />
+          <label>'. __('Expiration (MM/YYYY)', 'litton_bags') .'</label>
+          <input type="text" size="2" data-stripe="exp-month" class="cc-exp-month" data-numeric />
+          <span> / </span>
+          <input type="text" size="4" data-stripe="exp-year" class="cc-exp-year" data-numeric />
+      </div>
+      <div class="checkout-footer">
+        <a href="#">Review</a>
+        <!-- <a class="paypal-checkout" href="javascript:void(0);" title="Checkout via Paypal instead." data-payment-method="paypal"><img src="'.get_stylesheet_directory_uri().'/lib/ToMarket/media/paypal-checkout-icon.png" alt="Checkout via Paypal instead." /></a> -->
+      </div>
+    </div><!-- end step 2 -->
+
+    <!-- Step Three: Review -->
+    <div id="review" class="checkout-step" data-step="3">
+      <div class="modal-header">
+        <h3 class="checkout-step-title">'. __('Review','litton_bags') .'</h3>
+      </div>
+      <div class="modal-body">
+      <div>
+      <div class="checkout-footer">
+        <a href="#">Checkout</a>
+      </div>
+    </div>
+
+  </div>
+
+  ';
+  echo $checkout;
+}
+add_action('wp_footer','render_checkout');
 
 
 /**

@@ -1,11 +1,28 @@
 /**
- * Mixins
+ *	Mixins
  */
+.background-cover {
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+}
+.capitalize {
+  text-transform: capitalize;
+}
+.border-box {
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+}
 .no-text {
   text-indent: 150%;
   white-space: nowrap;
   overflow: hidden;
 }
+/**
+ * Colors
+ */
 /**
  * Hand Basket Styles
  */
@@ -370,5 +387,328 @@ html body .modal .checkoutReview {
   html body .hand-basket .checkoutReview .donation-promo-text,
   html body .modal .checkoutReview .donation-promo-text {
     width: 100%;
+  }
+}
+/**
+ * Checkout Styles
+ */
+.btn.btn-primary.btn-primary-checkout,
+.btn.btn-primary:visited.btn-primary-checkout,
+.btn.btn-primary:focus.btn-primary-checkout,
+.btn.btn-primary.btn-primary-checkout:hover,
+.btn.btn-primary:visited.btn-primary-checkout:hover,
+.btn.btn-primary:focus.btn-primary-checkout:hover {
+  width: 106px;
+  height: 45px;
+  background: url('../images/btn-primary-checkout.png') no-repeat;
+}
+.shake {
+  -webkit-animation-duration: 400ms;
+  -webkit-animation-timing-function: ease-in-out;
+  -webkit-animation-name: panelShakeAnimation;
+  -moz-animation-duration: 400ms;
+  -moz-animation-timing-function: ease-in-out;
+  -moz-animation-name: panelShakeAnimation;
+}
+.shake panelShakeAnimation 0 {
+  -webkit-transform: translateX(0);
+  -moz-transform: translateX(0);
+  -ms-transform: translateX(0);
+  -o-transform: translateX(0);
+  transform: translateX(0);
+}
+.shake panelShakeAnimation 12.5% {
+  -webkit-transform: translateX(-6px) rotateY(-5deg);
+  -moz-transform: translateX(-6px) rotateY(-5deg);
+  -ms-transform: translateX(-6px) rotateY(-5deg);
+  -o-transform: translateX(-6px) rotateY(-5deg);
+  transform: translateX(-6px) rotateY(-5deg);
+}
+.shake panelShakeAnimation 37.5% {
+  -webkit-transform: translateX(5px) rotateY(4deg);
+  -moz-transform: translateX(5px) rotateY(4deg);
+  -ms-transform: translateX(5px) rotateY(4deg);
+  -o-transform: translateX(5px) rotateY(4deg);
+  transform: translateX(5px) rotateY(4deg);
+}
+.shake panelShakeAnimation 62.5% {
+  -webkit-transform: translateX(-3px) rotateY(-2deg);
+  -moz-transform: translateX(-3px) rotateY(-2deg);
+  -ms-transform: translateX(-3px) rotateY(-2deg);
+  -o-transform: translateX(-3px) rotateY(-2deg);
+  transform: translateX(-3px) rotateY(-2deg);
+}
+.shake panelShakeAnimation 87.5% {
+  -webkit-transform: translateX(2px) rotateY(1deg);
+  -moz-transform: translateX(2px) rotateY(1deg);
+  -ms-transform: translateX(2px) rotateY(1deg);
+  -o-transform: translateX(2px) rotateY(1deg);
+  transform: translateX(2px) rotateY(1deg);
+}
+.shake panelShakeAnimation 100% {
+  -webkit-transform: translateX(0);
+  -moz-transform: translateX(0);
+  -ms-transform: translateX(0);
+  -o-transform: translateX(0);
+  transform: translateX(0);
+}
+@-webkit-keyframes panelShakeAnimation {
+  0 {
+    -webkit-transform: translateX(0);
+    -moz-transform: translateX(0);
+    -ms-transform: translateX(0);
+    -o-transform: translateX(0);
+    transform: translateX(0);
+  }
+  12.5% {
+    -webkit-transform: translateX(-6px) rotateY(-5deg);
+    -moz-transform: translateX(-6px) rotateY(-5deg);
+    -ms-transform: translateX(-6px) rotateY(-5deg);
+    -o-transform: translateX(-6px) rotateY(-5deg);
+    transform: translateX(-6px) rotateY(-5deg);
+  }
+  37.5% {
+    -webkit-transform: translateX(5px) rotateY(4deg);
+    -moz-transform: translateX(5px) rotateY(4deg);
+    -ms-transform: translateX(5px) rotateY(4deg);
+    -o-transform: translateX(5px) rotateY(4deg);
+    transform: translateX(5px) rotateY(4deg);
+  }
+  62.5% {
+    -webkit-transform: translateX(-3px) rotateY(-2deg);
+    -moz-transform: translateX(-3px) rotateY(-2deg);
+    -ms-transform: translateX(-3px) rotateY(-2deg);
+    -o-transform: translateX(-3px) rotateY(-2deg);
+    transform: translateX(-3px) rotateY(-2deg);
+  }
+  87.5% {
+    -webkit-transform: translateX(2px) rotateY(1deg);
+    -moz-transform: translateX(2px) rotateY(1deg);
+    -ms-transform: translateX(2px) rotateY(1deg);
+    -o-transform: translateX(2px) rotateY(1deg);
+    transform: translateX(2px) rotateY(1deg);
+  }
+  100% {
+    -webkit-transform: translateX(0);
+    -moz-transform: translateX(0);
+    -ms-transform: translateX(0);
+    -o-transform: translateX(0);
+    transform: translateX(0);
+  }
+}
+@-o-keyframes panelShakeAnimation {
+  0 {
+    -webkit-transform: translateX(0);
+    -moz-transform: translateX(0);
+    -ms-transform: translateX(0);
+    -o-transform: translateX(0);
+    transform: translateX(0);
+  }
+  12.5% {
+    -webkit-transform: translateX(-6px) rotateY(-5deg);
+    -moz-transform: translateX(-6px) rotateY(-5deg);
+    -ms-transform: translateX(-6px) rotateY(-5deg);
+    -o-transform: translateX(-6px) rotateY(-5deg);
+    transform: translateX(-6px) rotateY(-5deg);
+  }
+  37.5% {
+    -webkit-transform: translateX(5px) rotateY(4deg);
+    -moz-transform: translateX(5px) rotateY(4deg);
+    -ms-transform: translateX(5px) rotateY(4deg);
+    -o-transform: translateX(5px) rotateY(4deg);
+    transform: translateX(5px) rotateY(4deg);
+  }
+  62.5% {
+    -webkit-transform: translateX(-3px) rotateY(-2deg);
+    -moz-transform: translateX(-3px) rotateY(-2deg);
+    -ms-transform: translateX(-3px) rotateY(-2deg);
+    -o-transform: translateX(-3px) rotateY(-2deg);
+    transform: translateX(-3px) rotateY(-2deg);
+  }
+  87.5% {
+    -webkit-transform: translateX(2px) rotateY(1deg);
+    -moz-transform: translateX(2px) rotateY(1deg);
+    -ms-transform: translateX(2px) rotateY(1deg);
+    -o-transform: translateX(2px) rotateY(1deg);
+    transform: translateX(2px) rotateY(1deg);
+  }
+  100% {
+    -webkit-transform: translateX(0);
+    -moz-transform: translateX(0);
+    -ms-transform: translateX(0);
+    -o-transform: translateX(0);
+    transform: translateX(0);
+  }
+}
+@-ms-keyframes panelShakeAnimation {
+  0 {
+    -webkit-transform: translateX(0);
+    -moz-transform: translateX(0);
+    -ms-transform: translateX(0);
+    -o-transform: translateX(0);
+    transform: translateX(0);
+  }
+  12.5% {
+    -webkit-transform: translateX(-6px) rotateY(-5deg);
+    -moz-transform: translateX(-6px) rotateY(-5deg);
+    -ms-transform: translateX(-6px) rotateY(-5deg);
+    -o-transform: translateX(-6px) rotateY(-5deg);
+    transform: translateX(-6px) rotateY(-5deg);
+  }
+  37.5% {
+    -webkit-transform: translateX(5px) rotateY(4deg);
+    -moz-transform: translateX(5px) rotateY(4deg);
+    -ms-transform: translateX(5px) rotateY(4deg);
+    -o-transform: translateX(5px) rotateY(4deg);
+    transform: translateX(5px) rotateY(4deg);
+  }
+  62.5% {
+    -webkit-transform: translateX(-3px) rotateY(-2deg);
+    -moz-transform: translateX(-3px) rotateY(-2deg);
+    -ms-transform: translateX(-3px) rotateY(-2deg);
+    -o-transform: translateX(-3px) rotateY(-2deg);
+    transform: translateX(-3px) rotateY(-2deg);
+  }
+  87.5% {
+    -webkit-transform: translateX(2px) rotateY(1deg);
+    -moz-transform: translateX(2px) rotateY(1deg);
+    -ms-transform: translateX(2px) rotateY(1deg);
+    -o-transform: translateX(2px) rotateY(1deg);
+    transform: translateX(2px) rotateY(1deg);
+  }
+  100% {
+    -webkit-transform: translateX(0);
+    -moz-transform: translateX(0);
+    -ms-transform: translateX(0);
+    -o-transform: translateX(0);
+    transform: translateX(0);
+  }
+}
+@keyframes panelShakeAnimation {
+  0 {
+    -webkit-transform: translateX(0);
+    -moz-transform: translateX(0);
+    -ms-transform: translateX(0);
+    -o-transform: translateX(0);
+    transform: translateX(0);
+  }
+  12.5% {
+    -webkit-transform: translateX(-6px) rotateY(-5deg);
+    -moz-transform: translateX(-6px) rotateY(-5deg);
+    -ms-transform: translateX(-6px) rotateY(-5deg);
+    -o-transform: translateX(-6px) rotateY(-5deg);
+    transform: translateX(-6px) rotateY(-5deg);
+  }
+  37.5% {
+    -webkit-transform: translateX(5px) rotateY(4deg);
+    -moz-transform: translateX(5px) rotateY(4deg);
+    -ms-transform: translateX(5px) rotateY(4deg);
+    -o-transform: translateX(5px) rotateY(4deg);
+    transform: translateX(5px) rotateY(4deg);
+  }
+  62.5% {
+    -webkit-transform: translateX(-3px) rotateY(-2deg);
+    -moz-transform: translateX(-3px) rotateY(-2deg);
+    -ms-transform: translateX(-3px) rotateY(-2deg);
+    -o-transform: translateX(-3px) rotateY(-2deg);
+    transform: translateX(-3px) rotateY(-2deg);
+  }
+  87.5% {
+    -webkit-transform: translateX(2px) rotateY(1deg);
+    -moz-transform: translateX(2px) rotateY(1deg);
+    -ms-transform: translateX(2px) rotateY(1deg);
+    -o-transform: translateX(2px) rotateY(1deg);
+    transform: translateX(2px) rotateY(1deg);
+  }
+  100% {
+    -webkit-transform: translateX(0);
+    -moz-transform: translateX(0);
+    -ms-transform: translateX(0);
+    -o-transform: translateX(0);
+    transform: translateX(0);
+  }
+}
+#checkout {
+  top: 0;
+  left: 0;
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  padding: 20px 20px 0;
+  background: rgba(237, 238, 237, 0.9);
+}
+#checkout label {
+  font-weight: 600;
+  font-size: 10px;
+}
+#checkout input.error {
+  border: 1px solid #e85846 !important;
+}
+#checkout .checkout-header {
+  padding: 20px 0 0;
+  background: #ffffff;
+}
+#checkout .checkout-header a.site-title {
+  float: none;
+  margin: 0 auto 15px;
+}
+#checkout .checkout-header ul.checkout-tabs {
+  margin: 0;
+  padding: 0;
+}
+#checkout .checkout-header ul.checkout-tabs:before,
+#checkout .checkout-header ul.checkout-tabs:after {
+  content: " ";
+  display: table;
+}
+#checkout .checkout-header ul.checkout-tabs:after {
+  clear: both;
+}
+#checkout .checkout-header ul.checkout-tabs li {
+  list-style: none;
+}
+#checkout .checkout-header ul.checkout-tabs a {
+  padding: 10px 0;
+  color: #FFF;
+  width: 33.33%;
+  display: block;
+  float: left;
+  background: gray;
+  text-align: center;
+}
+#checkout .checkout-header ul.checkout-tabs a.current {
+  background: #FFF;
+  color: gray;
+}
+#checkout .checkout-header ul.checkout-tabs a.complete {
+  color: #9bd2cb;
+}
+#checkout .checkout-step {
+  display: none;
+  padding: 10px;
+  width: 100%;
+  background: #ffffff;
+}
+#checkout .checkout-step .modal-body {
+  max-height: none;
+}
+#checkout .checkout-step .checkout-footer a {
+  color: #FFF;
+  background: #9bd2cb;
+  display: block;
+  text-transform: uppercase;
+  text-align: center;
+  width: 100%;
+  padding: 10px;
+}
+#basic-info.checkout-step .shipping-info {
+  display: none;
+}
+@media (min-width: 500px) {
+  #checkout .checkout-header,
+  #checkout .checkout-step {
+    width: 565px;
+    margin: 0 auto;
+    max-width: 565px;
   }
 }
