@@ -82,13 +82,8 @@ if ( function_exists( 'acf_add_options_sub_page' ) && function_exists( 'get_fiel
 // # Utilities
 require_once( __DIR__ . '/lib/ToMarket/Util.php');
 
-// # Stripe
-
 // # PayPal
 // require_once( get_stylesheet_directory() . '/lib/PayPal/payments/method-paypal.php' );
-
-// # EasyPost
-//require_once( get_stylesheet_directory() . '/lib/easypost.php' );
 
 
 
@@ -320,7 +315,6 @@ function render_checkout() {
 }
 add_action('wp_footer','render_checkout');
 
-
 function stripe_api_key( $type ) {
   if ( $type === 'secret' ) {
     if ( get_field( 'stripe_api_mode', 'option' ) === true ) {
@@ -354,9 +348,7 @@ function process_stripe_payment() {
     Stripe::setApiKey( stripe_api_key('secret') );
     // # Retrieve Payment Token from Submitted Form
     $token = $_POST['stripeToken'];
-
     // # Calculate product costs here
-
     // # Attempt to charge the Card
     try {
       $charge = Stripe_Charge::create(array(
@@ -386,6 +378,69 @@ function process_stripe_payment() {
 }
 add_action('init', 'process_stripe_payment');
 
+
+// # EasyPost
+function set_easypost_api_key() {
+  if ( get_field( 'easypost_api_mode', 'option' ) === true ) {
+    $stripe_api_key = get_field( 'easypost_test_secret_api_key', 'option' );
+  } else {
+    $stripe_api_key = get_field( 'easypost_test_secret_api_key', 'option' );
+  }
+  return $stripe_api_key;
+}
+
+function easypost_verify_address() {
+  global $path_to_plugin;
+  require_once( __DIR__ . "/lib/EasyPost/lib/easypost.php");
+}
+add_action( 'init', 'easypost_verify_address' );
+
+
+function easypost_create_label() {
+
+  global $path_to_plugin;
+  require_once( __DIR__ . "/lib/EasyPost/lib/easypost.php");
+  \EasyPost\EasyPost::setApiKey( set_easypost_api_key() );
+  // $to_address = \EasyPost\Address::create(
+  //     array(
+  //         "name"    => "Dirk Diggler",
+  //         "street1" => "388 Townsend St",
+  //         "street2" => "Apt 20",
+  //         "city"    => "San Francisco",
+  //         "state"   => "CA",
+  //         "zip"     => "94107",
+  //         "phone"   => "415-456-7890"
+  //     )
+  // );
+  // $from_address = \EasyPost\Address::create(
+  //     array(
+  //         "company" => "Simpler Postage Inc",
+  //         "street1" => "764 Warehouse Ave",
+  //         "city"    => "Kansas City",
+  //         "state"   => "KS",
+  //         "zip"     => "66101",
+  //         "phone"   => "620-123-4567"
+  //     )
+  // );
+  // $parcel = \EasyPost\Parcel::create(
+  //     array(
+  //         "predefined_package" => "LargeFlatRateBox",
+  //         "weight" => 76.9
+  //     )
+  // );
+  // $shipment = \EasyPost\Shipment::create(
+  //     array(
+  //         "to_address"   => $to_address,
+  //         "from_address" => $from_address,
+  //         "parcel"       => $parcel
+  //     )
+  // );
+  //
+  // $shipment->buy($shipment->lowest_rate());
+  //
+  // echo $shipment->postage_label->label_url;
+}
+add_action( 'init', 'easypost_create_label' );
 
 // /**
 //  *	Verify address using EasyPost API
