@@ -28,7 +28,7 @@ html body {
     margin-right: 0;
   }
 
-  .hand-basket, .modal {
+  .hand-basket, #checkout {
     background: #FFF;
     border: none;
     z-index: 9999;
@@ -36,7 +36,7 @@ html body {
     .arrow {
       display: none;
     }
-    .hand-basket-content, .checkoutReview {
+    .hand-basket-content, #review .modal-body {
       font-size: 16px;
       font-weight: 300;
       padding: 19px 25px 15px 25px;
@@ -111,7 +111,7 @@ html body {
       }
       hr { border-top-color: #EFEFEF; .clearfix(); clear: both; }
       .donation-promo-text { width: 340px; font-size: 13px; display: block; float: left; margin-top: -2px; margin-bottom: 15px; }
-      .checkout {
+      .toggle-checkout {
         font-size: 12px;
         text-transform: uppercase;
         margin: 0 auto 22px;
@@ -119,6 +119,7 @@ html body {
         padding: 5px 45px;
         float: right;
         cursor: pointer;
+        background-color: @mint;
       }
     } // .hand-basket-content, .checkoutReview
     .checkoutReview { padding: 0; }
@@ -211,29 +212,101 @@ html body {
   width: 100%;
   height: 100%;
   padding: 20px 20px 0;
-  background: fade(@lightGray,90%);
+  background: fade(@lightGray,90%) !important;
 
-  label { font-weight: 600; font-size: 10px; }
+  color: @darkGray;
+  font-weight: normal;
+  h4 { font-weight: normal; text-align: center; line-height: 1.2; font-size: 16px; }
+
+  // Checkout form styles
+  .input-group {
+    position: relative;
+    margin-bottom: 10px;
+    label { display: none; font-weight: 600; font-size: 10px; color: @darkGray; text-transform: uppercase; }
+    .input-group-addon {
+      position: absolute;
+      padding: 8px 15px 11px;
+      display: block;
+      .clearfix();
+      .roundCorners( 4px 0 0 4px );
+      i { color: fade( @darkGray, 30% ); }
+    }
+    .input-group-addon + input { padding-left: 40px; }
+    input { color: @darkGray; padding: 18px 15px; margin: 0; width: 100%;
+      &[data-stripe="address-city"] { width: 45%; }
+      &[data-stripe="address-zip"] { width: 25%; }
+      &[data-stripe="address-state"] { width: 15%; }
+      &[data-stripe="address-country"] { width: 12%; }
+
+      &[data-stripe="cvc"] { width: 30%; text-align: center; }
+      &[data-stripe="exp-month"] { width: 30%; text-align: center; }
+      &[data-stripe="exp-year"] { width: 36%; text-align: center; }
+    }
+  }
   input.error { border: 1px solid @redAccent !important; }
+  .ok { color: fade( @mint, 90% ) !important; }
+  .error { color: fade( @watermelon, 90% ) !important; }
+
+  // Checkout CC images
+  ul.cc-icons {
+    margin: 0 0 20px 0;
+    .clearfix();
+    li.cc-icon {
+      width: 32px;
+      height: 32px;
+      float: left;
+      list-style: none;
+      &.visa { background: url('../../media/cc/visa_32-bw.png'); }
+      &.mastercard { background: url('../../media/cc/mastercard_32-bw.png'); }
+      &.amex { background: url('../../media/cc/american_express_32-bw.png'); }
+      &.discover { background: url('../../media/cc/discover_32-bw.png'); }
+      &.jcb { background: url('../../media/cc/jcb_32-bw.png'); }
+    }
+  }
 
   .checkout-header {
-    padding: 20px 0 0;
-    background: rgba( 255, 255, 255, 1.0);
-    a.site-title { float: none; margin: 0 auto 15px; }
+    position: relative;
+    padding: 38px 0 0;
+    background: url('../../media/checkout-header-bg.jpg');
+    .roundCorners( 8px 8px 0 0 );
+    .close { position: absolute; right: 0; top: -10px; font-size: 14px; margin: 35px; color: #FFF; #font-family > .source-sans-pro; opacity: 0.8; }
+    a.site-title { float: none; margin: 15px auto 40px; }
     ul.checkout-tabs {
       margin: 0;
       padding: 0;
+      background-color: @darkGray;
       .clearfix();
-      li { list-style: none; }
+      li:nth-child(3) a { width: 34%; }
+      li { list-style: none }
       a {
-        padding: 10px 0;
+        padding: 12px 0;
         color: #FFF;
-        width: 33.33%;
+        width: 33%;
         display: block;
         float: left;
         background: gray;
         text-align: center;
+        text-decoration: none;
+        .step-number {
+          width: 20px;
+          height: 20px;
+          font-size: 10px;
+          display: none;
+          margin-right: 10px;
+          color: #FFF;
+          background-color: @darkGray;
+          .roundCorners( 10px );
+        }
+        // i { display: none; }
+        .step-name {
+          display: none;
+          text-transform: uppercase;
+          font-size: 12px;
+        }
+        &[href="#message"] { display: none; }
         &.current {
+          z-index: 99;
+          position: relative;
           background: #FFF;
           color: gray;
         }
@@ -243,17 +316,26 @@ html body {
   }
   .checkout-step {
     display: none;
-    padding: 10px;
+    position: relative;
+    //padding: 10px;
     width: 100%;
     background: rgba( 255, 255, 255, 1.0);
+    .roundCorners( 0 0 8px 8px );
     // -moz-box-shadow:    3px 3px 5px 6px #ccc;
     // -webkit-box-shadow: 3px 3px 5px 6px #ccc;
     // box-shadow:         2px 2px 8px 1px rgba(210, 210, 210, 1.0);
     .modal-body { max-height: none; }
     .checkout-footer {
-      a { color: #FFF; background: @mint; display: block; text-transform: uppercase; text-align: center; width: 100%; padding: 10px; }
+      a { .roundCorners( 0 0 4px 4px ); color: #FFF; display: block; text-transform: uppercase; text-align: center; width: 100%; padding: 10px;
+        &.mint{ background: @mint; }
+        &.watermelon{ background: @watermelon; }
+      }
     }
-  }
+    &#message {
+      .modal-body div { width: 100%; }
+      img { width: 400px; margin: 20px 60px 20px; }
+    }
+  } // .checkout-step
 }
 
 // Step 2
@@ -269,6 +351,13 @@ html body {
       width: 565px;
       margin: 0 auto;
       max-width: 565px;
+    }
+    .checkout-header {
+      margin: 10% auto 0;
+    }
+    .checkout-step {
+      .ste
+      .step-name { display: block; }
     }
   }
 }

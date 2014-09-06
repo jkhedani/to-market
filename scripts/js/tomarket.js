@@ -1,31 +1,5 @@
 jQuery( document ).ready( function($) {
 
- /**
-	* jQuery Click Options
-	* @requires jQuery
-	* @desc Allow users to make dropdown/radio selections just by clicking! Ideal
-	* for selecting options in shopping carts. All clickable elements are
-	* created in JS so if JS fails, no worries!
-	*/
-	$.fn.clickop = function() {
-		// Hide <select> element and title
-		this.hide();
-		// Create container for selections
-		this.after('<div class="jquery-color-selection"><ul></ul></div>');
-		// Grab available color options and create buttons in color container
-		this.children('option').each(function() {
-			$('.jquery-color-selection ul').append('<li><a href="#" data-color-value="'+$(this).val()+'" class="'+$(this).val()+'" style="background-color:'+$(this).data('background-color')+'" data-option-sold-out="'+$(this).data('option-sold-out')+'">'+$(this).val()+'</a></li>').addClass('capitalize');
-		});
-		// Select the appropriate color value
-		$('.jquery-color-selection a').on('click',function() {
-			$('.jquery-color-selection a').removeClass('selected');
-			$(this).addClass('selected');
-			var colorValue = $(this).attr('data-color-value');
-			$('.product-color-selection').val(colorValue);
-			return false;
-		});
-	}
-
 	/**
 	 * Hand Basket
 	 * Requires: simpleStorage.js, jQuery
@@ -95,9 +69,7 @@ jQuery( document ).ready( function($) {
 			handbasket_items += '<div class="auxfees"><span class="total-title">Shipping: </span><span class="line-item-cost">Free Domestic Shipping<a class="shipping-popover-trigger" data-toggle="tooltip" title="'+to_market_scripts.shipping_text+'" href="javascript:void(0);" ><i class="fa fa-info-circle"></i></a></span></div>';
 			handbasket_items += '<div class="total"><span class="total-title">Total: </span><span class="line-item-cost">'+format_money(grand_total)+'</span></div>';
 			handbasket_items += '</div>';
-			handbasket_items += '<hr />';
-			handbasket_items += '<span class="donation-promo-text">'+to_market_scripts.donation_promo_text+'</span>';
-			handbasket_items += '<a class="checkout" data-toggle="checkout" data-target="#checkout">Checkout</a>';
+
 		} // handbasket_has_items check
 
 		// # Determine which type of hand basket we are going to generate
@@ -107,8 +79,15 @@ jQuery( document ).ready( function($) {
 		// # Primary function of popver is of the shopping cart
 		if ( type === 'popover' ) {
 
-			// Prepend "legend" and title in the hand basket (gets overwritten if in template)
-			handbasket_items = "<h1>Shopping Cart</h1><div class='hand-basket-preview-legend'><span class='product-title'>Product Name</span><span class='product-price'>Unit Price</span><span class='product-qty'>Qty</span><span class='product-subtotal'>Subtotal</span><span class='product-remove'>Remove</span></div>" + handbasket_items;
+			if ( simpleStorage.index().length > 0 ) {
+				// Prepend "legend" and title in the hand basket (gets overwritten if in template)
+				handbasket_items = "<h1>Shopping Cart</h1><div class='hand-basket-preview-legend'><span class='product-title'>Product Name</span><span class='product-price'>Unit Price</span><span class='product-qty'>Qty</span><span class='product-subtotal'>Subtotal</span><span class='product-remove'>Remove</span></div>" + handbasket_items;
+				// Append promo text and basket trigger checkout button
+				handbasket_items += '<hr />';
+				handbasket_items += '<span class="donation-promo-text">'+to_market_scripts.donation_promo_text+'</span>';
+				handbasket_items += '<a class="toggle-checkout" data-toggle="checkout" data-target="#checkout">Checkout</a>';
+			}
+
 
 			$('[data-toggle="hand-basket"]').popover({
 				'html'			: true,
@@ -148,19 +127,57 @@ jQuery( document ).ready( function($) {
 		});
 	});
 
+ /**
+	* jQuery Click Options (this probably just needs to be integrated into code)
+	* @requires jQuery
+	* @desc Allow users to make dropdown/radio selections just by clicking! Ideal
+	* for selecting options in shopping carts. All clickable elements are
+	* created in JS so if JS fails, no worries!
+	*/
+	$.fn.clickop = function() {
+		// Hide <select> element and title
+		this.hide();
+		// Create container for selections
+		this.after('<div class="jquery-color-selection"><ul></ul></div>');
+		// Grab available color options and create buttons in color container
+		this.children('option').each( function() {
+			$('.jquery-color-selection ul').append('<li><a href="#" data-color-value="'+$(this).val()+'" data-checkout-image-preview="'+$(this).data('checkout-image-preview')+'" class="'+$(this).val()+'" style="background-color:'+$(this).data('background-color')+'" data-option-sold-out="'+$(this).data('option-sold-out')+'">'+$(this).val()+'</a></li>').addClass('capitalize');
+		});
+		// Select the appropriate color value
+		$(document).on( 'click', '.jquery-color-selection a', function() {
+
+			// # Disable product selection for sold out options.
+			if ( $(this).data('option-sold-out') == 1 ) {
+				return false;
+			}
+
+			// # Affect the <select> element
+			$('.jquery-color-selection a').removeClass('selected');
+			$(this).addClass('selected');
+			var colorValue = $(this).attr('data-color-value');
+			var previewUrl = $(this).attr('data-checkout-image-preview');
+			$('.product-color-selection').val(colorValue); // Update select with latest value
+
+			// # Re-update add-to cart button
+			// Retrieve the data value we wish to retrieve and update
+			var option_target = $('.product-color-selection').data('target');
+			// Retrieve option values
+			var option_new_data = $('.product-color-selection').find('option:selected').val();
+			console.log(option_new_data);
+			// Update #add-to-handbasket values
+			$('.add-handbasket-item').attr( option_target, option_new_data);
+
+			// # Update image url values
+			var option_target = 'data-product_checkout_image_preview';
+			var option_new_data = $('.product-color-selection').find('option:selected').data('checkout-image-preview');
+			$('.add-handbasket-item').attr( option_target, option_new_data);
+
+			return false;
+		});
+	}
+
 	// # The <select> element you wish to click instead.
 	$('.product-color-selection').clickop();
-
-	// # Users select options on product
-	$(document).on( 'change', '.product-option', function() {
-		// Retrieve the data value we wish to retrieve and update
-		var option_target = $(this).data('target');
-		// Retrieve option values
-		var option_new_data = $(this).find('option:selected').val();
-		console.log(option_new_data);
-		// Update #add-to-handbasket values
-		$('.add-handbasket-item').attr( option_target, option_new_data);
-	});
 
 	// # Users Add Products to Hand Basket
 	$(document).on('click', '.add-handbasket-item', function() {
@@ -171,6 +188,7 @@ jQuery( document ).ready( function($) {
 
 		// Compile product values based on data attributes
 		var product_options = $(this).data();
+		console.log(product_options);
 
 		// Look through array. If any are left blank, error out.
 		for ( var key in product_options ) {
@@ -194,9 +212,7 @@ jQuery( document ).ready( function($) {
 			$('[data-toggle="hand-basket"]').popover('toggle');
 		}
 
-
 	});
-	// simpleStorage.flush();
 
 	/**
 	 * Checkout
@@ -261,77 +277,68 @@ jQuery( document ).ready( function($) {
 		$(this).addClass('current');
 		// Hide current step, target and show desired step.
 		var target_step = $(this).data('target');
-		$('#checkout .checkout-step').hide();
-		$('#checkout [data-step="'+target_step+'"]').show();
+		$('#checkout .checkout-step').removeClass('current').hide();
+		$('#checkout [data-step="'+target_step+'"]').addClass('current').show();
 		return false;
 	});
 
-
-	$(document).on( 'show.bs.modal', '#checkout', function() {
-		// SHOW Appropriate Step Determined by Hash
-		var step_to_show = window.location.hash;
-		console.log(step_to_show);
-		$(document).find('#checkout .checkout-tabs a[href="'+step_to_show+'"]').click();
-	});
-
-
-
-	// # Create Checkout
-	//	 It seems that the modal should probably be called last
-	//	 or at least before all the event listners
-	$('#checkout').modal({ backdrop : false, show : false, });
-
-	// # Show checkout via URL query
-	if ( get_query_variable('checkout') === 'yes' ) {
-		$('#checkout').modal('show');
-	}
-
-	// # Show checkout via click event
-	$(document).on('click', '[data-toggle="checkout"]', function() {
-		$('#checkout').modal('show');
-	});
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 	// SHOW
-	// # Allow stepping through checkout by hashbanging
-	// http://stackoverflow.com/questions/298503/how-can-you-check-for-a-hash-in-a-url-using-javascript
 	$(document).on( 'show.bs.modal', '#checkout', function() {
-		// ADD Hand Basket Items to Cart
+		// ADD Hand Basket Items to Checkout
 		var handbasket_items = refresh_handbasket('raw');
-		$(document).find('#review.checkout-step .modal-body').append( handbasket_items );
-
+		$(document).find('#review.checkout-step .modal-body .hand-basket-product').remove();
+		$(document).find('#review.checkout-step .modal-body .checkout-totals').remove();
+		$(document).find('#review.checkout-step .modal-body').prepend( handbasket_items );
 	});
+
 
 	// SHOWN
-	// # Prevent page scrolling when modal is present
 	$(document).on( 'shown.bs.modal', '#checkout', function() {
+		// # Prevent page scrolling when modal is present
 		$('html').css( 'overflow', 'hidden' );
 		$('html').addClass('fixed');
 	});
 
 	// HIDDEN
 	$(document).on( 'hidden.bs.modal', '#checkout', function() {
+		// # Restore scrolling functionality
 		$('html').css( 'overflow-y', 'scroll' );
 		$('html').removeClass('fixed');
 	});
 
+	// CREATE Checkout
+	//	 It seems that the modal should probably be called last
+	//	 or at least before all the event listners
+	$('#checkout').modal({ backdrop : false, show : false, });
 
+	// QUERY VARIABLES
+	// # Display checkout via URL query
+	if ( get_query_variable('checkout') === 'yes' ) {
+		$('#checkout').modal('show');
+		// Click the first tab to show first step
+		$(document).find('#checkout .checkout-tab[data-target="1"]').click();
+	}
+	if ( get_query_variable('step') ) {
+		// Determine which step to show
+		var step_to_show = get_query_variable( 'step' );
+		$(document).find('#checkout .checkout-tabs a[data-target="'+step_to_show+'"]').click();
+	}
+	if ( get_query_variable('result') ) {
+		// # Display the checkout step 4, message screen
+		$(document).find('#checkout .checkout-tabs a[data-target="4"]').click();
+		if ( get_query_variable('result') === 'success' ) {
+
+		}
+	}
+
+	// # Display checkout via click event
+	$(document).on('click', '[data-toggle="checkout"]', function() {
+		// Click the first tab to show first step
+		$(document).find('#checkout .checkout-tab[data-target="1"]').click();
+		// Hide handbasket
+		$('.hand-basket').popover('toggle');
+		$('#checkout').modal('show');
+	});
 
 }); // jQuery
 
