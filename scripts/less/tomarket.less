@@ -219,6 +219,7 @@ html body {
   h4 { font-weight: normal; text-align: center; line-height: 1.2; font-size: 16px; }
 
   // Checkout form styles
+  .form-helper-text { margin: 10px 0; font-size: 12px; }
   .input-group {
     position: relative;
     margin-bottom: 10px;
@@ -242,10 +243,21 @@ html body {
       &[data-stripe="exp-month"] { width: 30%; text-align: center; }
       &[data-stripe="exp-year"] { width: 36%; text-align: center; }
     }
+    input[type='checkbox'] { width: auto; }
+    .ok { i { color: fade( @mint, 60% ) !important; } }
+    .error { i { color: fade( @watermelon, 60% ) !important; } }
   }
-  input.error { border: 1px solid @redAccent !important; }
-  .ok { color: fade( @mint, 90% ) !important; }
-  .error { color: fade( @watermelon, 90% ) !important; }
+
+  .alert-message {
+    display: none;
+    width: 100%;
+    color: #FFF;
+    padding: 15px;
+    margin: 15px 0 5px;
+    i { margin-right: 15px; }
+    &.ok { background-color: fade(@mint, 60%); }
+    &.error { background-color: fade(@watermelon, 60%); }
+  }
 
   // Checkout CC images
   ul.cc-icons {
@@ -339,11 +351,8 @@ html body {
 }
 
 // Step 2
-#basic-info.checkout-step {
-  .basic-info    {  }
-  .billing-info  {  }
-  .shipping-info { display: none; }
-}
+#basic-info.checkout-step { }
+#shipping-address { display: none; }
 
 @media ( min-width: 500px ) {
   #checkout {

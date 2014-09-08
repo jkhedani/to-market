@@ -216,7 +216,7 @@ jQuery( document ).ready( function($) {
 
 	/**
 	 * Checkout
-	 * Requires: jQuery, BootstrapJS (Modal)
+	 * Requires: jQuery, BootstrapJS (Modal), Stripe & EasyPost
 	 */
 
 	// # Checkout Testing Parameters
@@ -227,11 +227,11 @@ jQuery( document ).ready( function($) {
 		function input_step_basic_dev_data() {
 			$('input[name="customer-name"]').val('Justin Hedani');
 			$('input[name="customer-email"]').val('jkhedani@gmail.com');
-			$('input[data-stripe="address-line1"]').val('3927 Koko Drive');
-			$('input[data-stripe="address-city"]').val('Honolulu');
-			$('input[data-stripe="address-zipcode"]').val('96816');
-			$('input[data-stripe="address-state"]').val('HI');
-			$('input[data-stripe="address-country"]').val('USA');
+			$('input[data-stripe="address-line1"], input[data-easypost="shipping-address-line1"]').val('3927 Koko Drive');
+			$('input[data-stripe="address-city"], input[data-easypost="shipping-address-city"]').val('Honolulu');
+			$('input[data-stripe="address-zipcode"], input[data-easypost="shipping-address-zipcode"]').val('96816');
+			$('input[data-stripe="address-state"], input[data-easypost="shipping-address-state"]').val('HI');
+			$('input[data-stripe="address-country"], input[data-easypost="shipping-address-country"]').val('USA');
 		}
 		// Step "Payment"
 		function input_step_payment_dev_data() {
@@ -247,7 +247,8 @@ jQuery( document ).ready( function($) {
 			input_step_payment_dev_data();
 		}
 	}
-	if ( allow_dev_inputs = true ) {
+
+	if ( allow_dev_inputs === true ) {
 		$(document).on( 'show.bs.modal', '#checkout', function() {
 			insert_dev_inputs( 'all' );
 		});
@@ -265,9 +266,21 @@ jQuery( document ).ready( function($) {
      return(false);
 	}
 
+	// # Convert form data to json
+	//	 Requires: jQuery
+	var convert_form_to_json = function( form ) {
+		var url_encoded_array = form.serializeArray();
+		var json = {};
+		for ( i = 0; i < url_encoded_array.length; i++ ) {
+			json[ url_encoded_array[i]['name'] ] = url_encoded_array[i]['value'];
+		}
+		return json;
+	}
+
 	/**
 	 * Checkout Event Listeners
-   */
+   *
+	 */
 
 	// # Allow tabbed interface through checkout
 	$(document).on('click', '.checkout-tab', function() {
@@ -297,6 +310,7 @@ jQuery( document ).ready( function($) {
 		// # Prevent page scrolling when modal is present
 		$('html').css( 'overflow', 'hidden' );
 		$('html').addClass('fixed');
+
 	});
 
 	// HIDDEN
@@ -339,6 +353,188 @@ jQuery( document ).ready( function($) {
 		$('.hand-basket').popover('toggle');
 		$('#checkout').modal('show');
 	});
+
+
+/******************************************************************************/
+/********************************* EasyPost ***********************************/
+/******************************************************************************/
+
+	// # Show Shipping address field
+	$(document).on( 'click', '#show-shipping-address-fields', function() {
+		if ( $("#show-shipping-address-fields").is(':checked') ) {
+			$('#shipping-address').show();
+		} else {
+			$('#shipping-address').hide();
+		}
+	});
+
+	// # Populate shipping address field (possibly on keyup)
+	// $(document).on( 'keyup', 'input.address', function() {
+	// 	var $(this).data('shipping-target');
+	// });
+
+	// Address info - this isn't going to work for optional fields...might
+	// want to connect to client side validation classes (if has error class)
+	var verify_address = function() {
+		// # Assume address is filled out until proven otherwise
+		var shipping_address_exists = true;
+		// # Create an array of objects containing name/value pairs of forms
+		var shipping_address = $('#shipping-address').serializeArray();
+		for ( i = 0; i < shipping_address.length; i++ ) {
+			// # If any value is empty.
+			if ( !shipping_address[i]['value'] ) {
+				// # Indicate that shipping address is not available.
+				$('#checkout .checkout-tabs [data-target="1"]').click();
+				// # Show alert message
+				$('#checkout .checkout-step#basic .alert-message span').html('Please ensure your shipping address is properly filled out.');
+				$('#checkout .checkout-step#basic .alert-message').show();
+				return false;
+			}
+		}
+
+		if ( shipping_address_exists === true ) {
+
+			// $(this).parents('.checkout-step').find('.overlay.loading').show(); // Show loading message
+			// $.post(shopping_cart_scripts.ajaxurl, {
+			// 	dataType: "jsonp",
+			// 	action: 'verify_shipping_address',
+			// 	nonce: shopping_cart_scripts.nonce,
+			// 	products: jProducts,
+			// }, function(response) {
+			// 	if ( response.success === true ) {
+			// 		$(this).parents('.checkout-step').find('.overlay.loading').hide(); // Show loading message
+			// 	}
+			// });
+
+		// # Inform customer that all address fields have not been filled out
+		}
+	}
+
+
+
+
+	/**
+	 * Process checkout
+	 * Submit shipping infor, create stripe token,
+	 */
+ 	$(document).on('click', '[data-action="checkout"]', function() {
+
+		// ### Show processing checkout
+		$('#checkout .overlay.loading').show(); // # Bring up "Processing Payment"
+		$(this).prop('disabled', true); // Disable submission to avoid double submits
+
+		// ### Basic Info (Used by multiple services)
+		var basic_info = convert_form_to_json( $('form#basic-info') );
+
+		// ### Shipping Address
+		// If shipping address is filled out, serialize data for processing.
+		// Convert serialized data to a json object for parsing later
+		var shipping_address = convert_form_to_json( $('form#shipping-address') );
+		// var shipping_address_object = {};
+		// for ( i = 0; i < shipping_address.length; i++ ) {
+		// 	shipping_address_object[ shipping_address[i]['name'] ] = shipping_address[i]['value'];
+		// }
+
+		// ### Product Info
+		// var shipping_address = $('#shipping-address').serialize();
+
+		// ### Stripe Construct payment token
+		Stripe.setPublishableKey(to_market_scripts.stripe_publishable_key); // # Present Publishable API Key
+		Stripe.card.createToken({
+			number: $('#checkout #payment input.card-number').val(),
+			cvc: $('#checkout #payment input.card-cvc').val(),
+			exp_month: $('#checkout #payment input.card-exp-month').val(),
+			exp_year: $('#checkout #payment input.card-exp-year').val()
+		}, stripeResponseHandler);
+		function stripeResponseHandler(status, response) {
+			var $form = $('#stripe-payment-form');
+			if ( response.error ) {
+				// Show the errors on current tab
+				//$form.find('.payment-errors').text(response.error.message);
+				$('[data-action="checkout"]').prop('disabled', false); // Re-enable checkout button
+				return false;
+			} else {
+				// response contains id and card, which contains additional card details
+				var token = response.id;
+				stripe_token = response.id;
+				// Insert the token into the form so it gets submitted to the server
+				$form.append($('<input type="hidden" name="stripeToken" />').val(token));
+				//$form.get(0).submit();
+				// ### Submit for serverside processing
+				$.post(to_market_scripts.ajaxurl, {
+					dataType: "jsonp",
+					action: 'process_checkout',
+					basicinfo: basic_info,
+					shippingaddress: shipping_address,
+					stripetoken: stripe_token,
+					//nonce: shopping_cart_scripts.nonce,
+				}, function(response) {
+					if ( response.success === true ) {
+						$(this).parents('.checkout-step').find('.overlay.loading').hide(); // Show loading message
+					}
+				});
+				return false;
+
+			}
+		} // stripeResponseHandler
+
+		// response
+			// # error bad address
+			// # error bad cc
+
+			// # success
+
+	 return false;
+
+
+	});
+
+
+/******************************************************************************/
+/************************* Client-side validation *****************************/
+/******************************************************************************/
+
+	/**
+	* jQuery Regex Email Validation
+	*/
+	function isValidEmailAddress(emailAddress) {
+		//var pattern = new RegExp(/^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?$/i);
+		return pattern.test(emailAddress);
+	};
+
+	// # Stripe: Payments Formatting
+	$('#checkout #payment input.card-number').payment('formatCardNumber');
+	$('#checkout #payment input.card-cvc').payment('formatCardExpiry');
+
+	// # Stripe: Payments Client-side Validation
+	$(document).on( 'blur', '#checkout input', function() {
+
+		var is_input_valid = false;
+
+		// If field is left blank...
+		if ( !$(this).val() ) {
+			$(this).prev().removeClass('ok');
+			$(this).prev().addClass('error');
+		} else {
+			$(this).prev().addClass('ok');
+			$(this).prev().removeClass('error');
+		}
+
+		// Validate email
+		// if ( $(this).hasClass('customer-email') ) {
+		//   if ( !isValidEmailAddress( $(this).val() ) ) {
+		//     $(this).prev().addClass('error');
+		//   } else {
+		//     $(this).prev().removeClass('error');
+		//   }
+		// }
+		// set field state (ok or error)
+
+	});
+
+	// # Validate Info
+		// Email
+	// # Validate Payments
 
 }); // jQuery
 

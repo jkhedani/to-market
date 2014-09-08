@@ -731,6 +731,10 @@ html body #checkout .checkoutReview {
   line-height: 1.2;
   font-size: 16px;
 }
+#checkout .form-helper-text {
+  margin: 10px 0;
+  font-size: 12px;
+}
 #checkout .input-group {
   position: relative;
   margin-bottom: 10px;
@@ -794,14 +798,30 @@ html body #checkout .checkoutReview {
   width: 36%;
   text-align: center;
 }
-#checkout input.error {
-  border: 1px solid #e85846 !important;
+#checkout .input-group input[type='checkbox'] {
+  width: auto;
 }
-#checkout .ok {
-  color: rgba(155, 210, 203, 0.9) !important;
+#checkout .input-group .ok i {
+  color: rgba(155, 210, 203, 0.6) !important;
 }
-#checkout .error {
-  color: rgba(255, 99, 104, 0.9) !important;
+#checkout .input-group .error i {
+  color: rgba(255, 99, 104, 0.6) !important;
+}
+#checkout .alert-message {
+  display: none;
+  width: 100%;
+  color: #FFF;
+  padding: 15px;
+  margin: 15px 0 5px;
+}
+#checkout .alert-message i {
+  margin-right: 15px;
+}
+#checkout .alert-message.ok {
+  background-color: rgba(155, 210, 203, 0.6);
+}
+#checkout .alert-message.error {
+  background-color: rgba(255, 99, 104, 0.6);
 }
 #checkout ul.cc-icons {
   margin: 0 0 20px 0;
@@ -954,7 +974,7 @@ html body #checkout .checkoutReview {
   width: 400px;
   margin: 20px 60px 20px;
 }
-#basic-info.checkout-step .shipping-info {
+#shipping-address {
   display: none;
 }
 @media (min-width: 500px) {

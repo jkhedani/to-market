@@ -31,23 +31,8 @@ function tomarket_enqueue_scripts() {
   wp_enqueue_script( 'bootstrap-tooltip-script', $path_to_plugin .'/scripts/js/bootstrap/tooltip.js', array(), false, true );
   wp_enqueue_script( 'bootstrap-popover-script', $path_to_plugin .'/scripts/js/bootstrap/popover.js', array(), false, true );
 
-  // To Market Scripts & Styles
-  wp_enqueue_style( 'to-market-styles', $path_to_plugin . '/scripts/css/tomarket.css' );
-  wp_enqueue_script( 'to-market-scripts', $path_to_plugin . '/scripts/js/tomarket.js', array('jquery','json2') );
-  wp_localize_script( 'to-market-scripts', 'to_market_scripts', array(
-    'tax_rate' => get_field('tax_rate', 'option'),
-    'donation_promo_text' => get_field('donation_promo_text', 'option'),
-    'shipping_text' => get_field('shipping_text', 'option'),
-  ));
-
   // HandBasket
   wp_enqueue_script( 'simpleStorage-script', $path_to_plugin . '/scripts/js/simpleStorage.js', array('jquery','json2') );
-  wp_enqueue_script( 'handbasket-scripts', $path_to_plugin . '/lib/HandBasket/handbasket.js', array('jquery','json2'), true );
-  wp_localize_script( 'handbasket-scripts', 'handbasket_scripts', array(
-    'ajaxurl' => admin_url('admin-ajax.php',$protocol),
-    'nonce' => wp_create_nonce('handbasket_scripts_nonce')
-  ));
-
   // Stripe
   if ( get_field( 'stripe_api_mode', 'option' ) === true ) {
     $stripe_publishable_api_key = get_field( 'stripe_live_publishable_api_key', 'option' ); // Use Test API Key for Stripe Processing
@@ -55,10 +40,37 @@ function tomarket_enqueue_scripts() {
     $stripe_publishable_api_key = get_field( 'stripe_test_publishable_api_key', 'option' ); // Use Test API Key for Stripe Processing
   }
   wp_enqueue_script( 'stripejs-script', $path_to_plugin . '/scripts/js/stripe/stripejs-v2.js', array(), false, true );
-  wp_enqueue_script( 'stripe-processing', $path_to_plugin . '/scripts/js/stripe/payments.js', array('jquery'));
-  wp_localize_script('stripe-processing', 'stripe_vars', array(
-    'publishable_key' => $stripe_publishable_api_key,
+
+  // To Market Scripts & Styles
+  // Note: Currently all scripts share the same ajax nonce.
+  wp_enqueue_style( 'to-market-styles', $path_to_plugin . '/scripts/css/tomarket.css' );
+  wp_enqueue_script( 'to-market-scripts', $path_to_plugin . '/scripts/js/tomarket.js', array('jquery','json2') );
+  wp_localize_script( 'to-market-scripts', 'to_market_scripts', array(
+    'ajaxurl' => admin_url('admin-ajax.php',$protocol),
+    'nonce' => wp_create_nonce('tomarket_scripts_nonce'),
+    'tax_rate' => get_field('tax_rate', 'option'),
+    'donation_promo_text' => get_field('donation_promo_text', 'option'),
+    'shipping_text' => get_field('shipping_text', 'option'),
+    'stripe_publishable_key' => $stripe_publishable_api_key,
   ));
+
+  // wp_enqueue_script( 'handbasket-scripts', $path_to_plugin . '/lib/HandBasket/handbasket.js', array('jquery','json2'), true );
+  // wp_localize_script( 'handbasket-scripts', 'handbasket_scripts', array(
+  //   'ajaxurl' => admin_url('admin-ajax.php',$protocol),
+  //   'nonce' => wp_create_nonce('handbasket_scripts_nonce')
+  // ));
+
+
+  // wp_enqueue_script( 'stripe-processing', $path_to_plugin . '/scripts/js/stripe/payments.js', array('jquery'));
+  // wp_localize_script('stripe-processing', 'stripe_vars', array(
+  //   'publishable_key' => $stripe_publishable_api_key,
+  // ));
+
+  // EasyPost
+  // wp_enqueue_script( 'easypost-scripts', $path_to_plugin . '/scripts/js/easypost/easypost.js', array('jquery'));
+  // wp_localize_script('easypost-scripts', 'easypost_vars', array(
+  //   'nonce' => wp_create_nonce('easypost_scripts_nonce')
+  // ));
 
   // // PayPal
   // wp_enqueue_script('paypal-scripts', get_stylesheet_directory_uri().'/lib/PayPal/payments/paypal-payment-scripts.js', array('jquery','json2'), true);
@@ -109,7 +121,7 @@ function render_checkout() {
 
   <div class="modal fade in" id="checkout" tabindex="-1" role="dialog" aria-labelledby="checkout" aria-hidden="true" data-backdrop="static">
     <div class="checkout-header">
-      <a class="site-title white" href="'.home_url( '/' ).'" title="'. esc_attr( get_bloginfo( 'name', 'display' ) ) .'" rel="home">'.get_bloginfo( 'name' ).'</a>
+      <a class="site-title white" href="#checkout" title="'. esc_attr( get_bloginfo( 'name', 'display' ) ) .'" rel="home">'.get_bloginfo( 'name' ).'</a>
       <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="fa fa-times"></i></button>
 
       <ul class="checkout-tabs">
@@ -148,10 +160,11 @@ function render_checkout() {
     <div id="basic" class="checkout-step" data-step="1">
       <div class="modal-header">
         <h3 class="checkout-step-title">'. __('Basic Information','litton_bags') .'</h3>
+        <div class="alert-message error"><i class="fa fa-bullhorn"></i><span>Some alert message.</span></div>
       </div>
       <div class="modal-body">
 
-        <fieldset class="form-row checkoutBasic basic-info" id="basic-info" >
+        <form action="" method="POST" id="basic-info" >
           <!-- <legend>Basic Information</legend> -->
           <div class="input-group">
             <label>'. __('Full Name', 'litton_bags') .'</label>
@@ -160,71 +173,81 @@ function render_checkout() {
           </div>
           <div class="input-group">
             <label>'. __('Email Address', 'litton_bags') .'</label>
-            <div class="input-group-addon"><i class="fa fa-envelope"></i></div>
-            <input type="text"  class="form-control" size="20" autocomplete="off" class="email" name="customer-email" placeholder="Email Address" />
+            <div class="input-group-addon"><i class="fa fa-at"></i></div>
+            <input type="text"  class="customer-email form-control" size="20" autocomplete="off" class="email" name="customer-email" placeholder="Email Address" />
           </div>
-        </fieldset>
+        </form>
 
-        <div class="form-row checkoutBasic basic-info" id="addr-info">
+        <form action="" method="POST" id="billing-address">
           <legend>Billing Address</legend>
           <div class="input-group">
             <label>'. __('Address Line 1', 'litton_bags') .'</label>
-            <input type="text" class="form-control" size="20" autocomplete="off" data-stripe="address-line1" class="address" placeholder="Address Line 1" />
+            <div class="input-group-addon"><i class="fa fa-envelope"></i></div>
+            <input type="text" class="form-control" size="20" autocomplete="off" data-stripe="address-line1" data-shipping-target="shipping-address-line1" class="address" placeholder="Address Line 1" />
           </div>
           <div class="input-group">
             <label>'. __('Address Line 2', 'litton_bags') .'</label>
-            <input type="text" class="form-control" size="20" autocomplete="off" data-stripe="address-line2" class="optional address" placeholder="Address Line 2" />
+            <input type="text" class="form-control" size="20" autocomplete="off" data-stripe="address-line2" data-shipping-target="shipping-address-line2" class="address" placeholder="Address Line 2" />
           </div>
           <div class="input-group">
             <label>'. __('City', 'litton_bags') .'</label>
-            <input type="text" class="form-control" size="20" autocomplete="off" data-stripe="address-city" placeholder="City" />
-
+            <div class="input-group-addon"><i class="fa fa-building"></i></div>
+            <input type="text" class="form-control" size="20" autocomplete="off" data-stripe="address-city" data-shipping-target="shipping-address-city" class="address" placeholder="City" />
+          </div>
+          <div class="input-group">
             <label>'. __('Zip Code', 'litton_bags') .'</label>
-            <input type="text" size="20" autocomplete="off" class="zip-code" data-stripe="address-zip" placeholder="Zipcode" />
-
+            <input type="text" size="20" autocomplete="off" class="zip-code" data-stripe="address-zip" data-shipping-target="shipping-address-zip" class="address" placeholder="Zipcode" />
+          </div>
+          <div class="input-group">
             <label>'. __('State', 'litton_bags') .'</label>
-            <input type="text" size="5" autocomplete="off" class="state" data-stripe="address-state" placeholder="State" />
-
+            <input type="text" size="5" autocomplete="off" class="state" data-stripe="address-state" data-shipping-target="shipping-address-state" class="address" placeholder="State" />
+          </div>
+          <div class="input-group">
             <label>'. __('Country', 'litton_bags') .'</label>
-            <input type="text" size="7" autocomplete="off" class="country" data-stripe="address-country" placeholder="USA" />
+            <input type="text" size="7" autocomplete="off" class="country" data-stripe="address-country" data-shipping-target="shipping-address-country" class="address" placeholder="USA" />
+          </div>
+          <div class="input-group">
+            <input id="show-shipping-address-fields" type="checkbox" />
+            <span class="formHelperText">My shipping address is different from my billing address.</span>
           </div>
 
-          <p class="formHelperText">Currently, we are only shipping to the United States on our website. Please email us for international purchases.</p>
-        </div>
+          <p class="form-helper-text">Currently, we are only shipping to the United States on our website. Please <a href="mailto:support@littonbags.com">email us</a> for international purchases.</p>
+        </form>
 
-        <input id="shippingIsDifferent" type="checkbox" />
-        <span class="formHelperText">My shipping address is different from my billing address.</span>
-
-        <div class="form-row basic-info shipping-info hide" id="addr-info-shipping">
+        <form action="" method="POST" id="shipping-address">
           <legend>Shipping Address</legend>
-          <label>'. __('Address Line 1', 'litton_bags') .'</label>
-          <input type="text" size="20" autocomplete="off" data-easypost="shipping-address-line1" name="shipping-address-line1" class="address" />
-          <label>'. __('Address Line 2', 'litton_bags') .'</label>
-          <input type="text" size="20" autocomplete="off" data-easypost="shipping-address-line2" name="shipping-address-line2" class="address optional" />
-          <div class="form-row-single">
-          <div>
-          <label>'. __('City', 'litton_bags') .'</label>
-          <input type="text" size="20" autocomplete="off" data-easypost="shipping-address-city" name="shipping-address-city" />
+          <div class="input-group">
+            <label>'. __('Address Line 1', 'litton_bags') .'</label>
+            <input type="text" size="20" autocomplete="off" data-easypost="shipping-address-line1" name="shipping-address-line1" class="address" placeholder="Address Line 1" />
           </div>
-          <div>
-          <label>'. __('State', 'litton_bags') .'</label>
-          <input type="text" size="20" autocomplete="off" class="state" data-easypost="shipping-address-state" name="shipping-address-state" />
+          <div class="input-group">
+            <label>'. __('Address Line 2', 'litton_bags') .'</label>
+            <input type="text" size="20" autocomplete="off" data-easypost="shipping-address-line2" name="shipping-address-line2" class="address optional" placeholder="Address Line 2" />
           </div>
-          <div>
-          <label>'. __('Zip Code', 'litton_bags') .'</label>
-          <input type="text" size="20" autocomplete="off" class="zip-code" data-easypost="shipping-address-zip" name="shipping-address-zip" />
+          <div class="input-group">
+            <label>'. __('City', 'litton_bags') .'</label>
+            <input type="text" size="20" autocomplete="off" data-easypost="shipping-address-city" name="shipping-address-city" placeholder="City" />
           </div>
-          <div>
-          <label>'. __('Country', 'litton_bags') .'</label>
-          <input type="text" size="20" autocomplete="off" class="country" data-easypost="shipping-address-country" name="shipping-address-country" />
+          <div class="input-group">
+            <label>'. __('State', 'litton_bags') .'</label>
+            <input type="text" size="20" autocomplete="off" class="state" data-easypost="shipping-address-state" name="shipping-address-state" placeholder="Zipcode" />
           </div>
+          <div class="input-group">
+            <label>'. __('Zip Code', 'litton_bags') .'</label>
+            <input type="text" size="20" autocomplete="off" class="zip-code" data-easypost="shipping-address-zip" name="shipping-address-zip" placeholder="State" />
           </div>
-        </div>
+          <div class="input-group">
+            <label>'. __('Country', 'litton_bags') .'</label>
+            <input type="text" size="20" autocomplete="off" class="country" data-easypost="shipping-address-country" name="shipping-address-country" placeholder="USA" />
+          </div>
+        </form>
 
       </div><!-- .modal-body -->
       <div class="checkout-footer">
-        <a href="#" class="mint">Next</a>
+        <a href="#" class="mint">Next »</a>
       </div>
+      <!-- Message Overlay -->
+      <div class="overlay loading"><i class="spinner medium"></i><div class="overlay-message-container"><h4>Validating Address</h4></div></div>
     </div><!-- end step 1 -->
 
     <!-- Step Two: Payment Info -->
@@ -244,10 +267,12 @@ function render_checkout() {
           </ul>
           <div class="input-group">
             <label>'. __('Name on Card', 'litton_bags') .'</label>
+            <div class="input-group-addon"><i class="fa fa-user"></i></div>
             <input type="text" class="form-control" size="20" autocomplete="off" data-stripe="name" placeholder="Name on card" />
           </div>
           <div class="input-group">
             <label>'. __('Card Number', 'litton_bags') .'</label>
+            <div class="input-group-addon"><i class="fa fa-credit-card"></i></div>
             <input type="text" class="form-control card-number" size="20" autocomplete="off" data-stripe="number" placeholder="Card Number" />
           </div>
           <div class="input-group">
@@ -283,7 +308,7 @@ function render_checkout() {
       <div class="checkout-footer">
         <a class="watermelon" href="#" data-action="checkout">Checkout</a>
       </div>
-      <div class="overlay loading"><i class="spinner medium"></i><div class="overlay-message-container"><h4>Processing Payment</h4></div></div>
+      <div class="overlay loading"><i class="spinner medium"></i><div class="overlay-message-container"><h4>Processing checkout</h4></div></div>
     </div>
 
     <!-- Step Four: Message Screen -->
@@ -326,6 +351,17 @@ function stripe_api_key( $type ) {
   }
 }
 
+// # EasyPost
+function set_easypost_api_key() {
+  if ( get_field( 'easypost_api_mode', 'option' ) === true ) {
+    $stripe_api_key = get_field( 'easypost_live_secret_api_key', 'option' );
+  } else {
+    $stripe_api_key = get_field( 'easypost_test_secret_api_key', 'option' );
+  }
+  return $stripe_api_key;
+}
+
+
 // Verify Checkout Charge Amount
 // @desc  A helper function to ensure no one is affecting prices
 //        at checkout.
@@ -334,6 +370,115 @@ function stripe_api_key( $type ) {
 function verify_checkout_charge_amount( $basketitems ) {
 
 }
+
+function easypost_verify_address( $address ) {
+  global $path_to_plugin;
+  require_once( __DIR__ . "/lib/EasyPost/lib/easypost.php");
+  \EasyPost\EasyPost::setApiKey( set_easypost_api_key() );
+  //$address_values = $_REQUEST['shipping_address'];
+  // $nonce = $_REQUEST['nonce'];
+  // if ( !wp_verify_nonce($nonce, 'handbasket_scripts_nonce')) die(__('Busted.') );
+  //
+  $address = \EasyPost\Address::create(array(
+    'name' => 'Dr. Steve Brule',
+    'street1' => '179 N Harbor Dr',
+    'city' => 'Redondo Beach',
+    'state' => 'CA',
+    'zip' => '90277',
+    'country' => 'US',
+    'email' => 'dr_steve_brule@gmail.com'
+  ));
+  $verified_address = $address->verify();
+  return $verfied_address;
+  //
+  // $response = json_encode(array(
+  //   'verified_address' => $verified_address,
+  // ));
+  //
+  // // Construct and send the response
+  // header("content-type: application/json");
+  // echo $response;
+  // exit;
+}
+//add_action( 'init', 'easypost_verify_address' );
+
+function process_checkout() {
+
+    // ### Setup Data
+    $basicinfo = $_REQUEST['basicinfo'];
+    $shippingaddress = $_REQUEST['shippingaddress'];
+    $stripetoken = $_REQUEST['stripetoken'];
+
+    ### Verify Address via EasyPost
+    global $path_to_plugin;
+    require_once( __DIR__ . "/lib/EasyPost/lib/easypost.php");
+    \EasyPost\EasyPost::setApiKey( set_easypost_api_key() );
+    $shipping_address = \EasyPost\Address::create(array(
+      'name' => $basicinfo['customer-name'],
+      'street1' => $shippingaddress['shipping-address-line1'],
+      'city' => $shippingaddress['shipping-address-city'],
+      'state' => $shippingaddress['shipping-address-state'],
+      'zip' => $shippingaddress['shipping-address-zip'],
+      'country' => $shippingaddress['shipping-address-country'],
+      'email' => $basicinfo['customer-email'],
+    ));
+
+    try {
+      $verified_address = $shipping_address->verify();
+    } catch(Exception $e) {
+      // We should append some but about if
+      error_log($e->getMessage());
+    }
+
+    // ### Stripe: Attempt to charge card
+    // If their shipping adress is valid
+    if ( isset($verified_address) && !empty($verified_address) ) {
+
+      require_once( __DIR__ . '/lib/Stripe/lib/Stripe.php'); // Load Stripe Client Library (PHP)
+      Stripe::setApiKey( stripe_api_key('secret') ); // # Present Secret API Key
+
+      try {
+        $charge = Stripe_Charge::create( array(
+          "amount" => 38639, // amount in cents, again
+          "currency" => "usd",
+          "card" => $stripetoken,
+          "description" => $basicinfo['customer-email']
+        ));
+        // Charge successful!
+        // 1. Send customer email
+        // 2. Send litton email
+
+        $redirect  = add_query_arg( array('checkout' => 'yes', 'result' => 'success'), $_POST['redirect']);
+
+      } catch(Stripe_CardError $e) {
+        // The card has been declined
+        error_log($e->getMessage());
+      }
+
+      // # Display appropriate message
+      if ( isset( $redirect ) ) {
+        wp_redirect( $redirect );
+        exit;
+      }
+
+    } // if address is verified
+
+
+    // ### process cc
+      // if failure click second tab and show error message
+      // if success
+        // create shipping label
+        // send admin and customer emails
+        // click fourth tab and show success message.
+}
+add_action('wp_ajax_nopriv_process_checkout', 'process_checkout');
+add_action('wp_ajax_process_checkout', 'process_checkout');
+
+//Run Ajax calls even if user is logged in
+// if ( isset($_REQUEST['action']) && ($_REQUEST['action']=='process_checkout') ):
+//   do_action( 'wp_ajax_' . $_REQUEST['action'] );
+//   do_action( 'wp_ajax_nopriv_' . $_REQUEST['action'] );
+// endif;
 
 /**
  * Process Stripe Payment
@@ -367,7 +512,6 @@ function process_stripe_payment() {
       error_log('card declined');
       // The card has been declined
     }
-    error_log('asdf');
 
     // # Display appropriate message
     if ( isset( $redirect ) ) {
@@ -378,22 +522,6 @@ function process_stripe_payment() {
 }
 add_action('init', 'process_stripe_payment');
 
-
-// # EasyPost
-function set_easypost_api_key() {
-  if ( get_field( 'easypost_api_mode', 'option' ) === true ) {
-    $stripe_api_key = get_field( 'easypost_test_secret_api_key', 'option' );
-  } else {
-    $stripe_api_key = get_field( 'easypost_test_secret_api_key', 'option' );
-  }
-  return $stripe_api_key;
-}
-
-function easypost_verify_address() {
-  global $path_to_plugin;
-  require_once( __DIR__ . "/lib/EasyPost/lib/easypost.php");
-}
-add_action( 'init', 'easypost_verify_address' );
 
 
 function easypost_create_label() {
