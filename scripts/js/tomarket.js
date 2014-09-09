@@ -6,7 +6,7 @@ jQuery( document ).ready( function($) {
 	 *
 	 * @failure Code may fail in generating a new item in the basket when a
    *				  setting other than color can differentiate the same item.
-	 * @to do Wrap this all up into one big class
+	 * @todo Wrap this all up into one big class
 	 *
 	 * cart must fixes
 	 *	1. ensure option selection loads correct image url and price
@@ -15,15 +15,20 @@ jQuery( document ).ready( function($) {
 	 *
 	 */
 
-	var format_money = function( cents ) {
-		return '$ ' + ( cents / 100 ).toFixed(2);
-	}
-
 	// # Disable scripts for clients that cannot properly utilize simpleStorage
 	if ( ! simpleStorage.canUse() ) {
 		var message = "In order to have the best experience on our site, please leave private browsing or use a different browser. Thank you!";
 		alert( message );
 		return;
+	}
+
+	// #
+	// # HandBasket Functions
+	// #
+
+	// # Format money to us dollars with cents as input amount
+	var format_money = function( cents ) {
+		return '$ ' + ( cents / 100 ).toFixed(2);
 	}
 
 	// # Generate basket
@@ -42,21 +47,23 @@ jQuery( document ).ready( function($) {
 			var handbasket_item_keys = simpleStorage.index();
 			for ( i = 0; i < handbasket_item_keys.length; i++ ) {
 				var handbasket_item_object = simpleStorage.get(handbasket_item_keys[i]);
-				handbasket_subtotal = handbasket_subtotal + handbasket_item_object['product_option_price'];
-				var handbasket_item  = "<div class='hand-basket-product' data-local-storage-key='"+handbasket_item_object['product_name'] + ' ' + handbasket_item_object['product_color_name']+"'>";
-						handbasket_item += "	<span class='product-preview'><img src='"+handbasket_item_object['product_checkout_image_preview']+"' /></span>";
+				handbasket_subtotal = handbasket_subtotal + ( handbasket_item_object['product_qty'] * handbasket_item_object['sku_price'] );
+				var handbasket_item  = "<div class='hand-basket-product' data-sku='"+handbasket_item_object['sku']+"'>";
+						handbasket_item += "	<span class='product-preview'><img src='"+handbasket_item_object['sku_checkout_image_preview']+"' /></span>";
 						handbasket_item += "	<div class='product-description'>";
 						handbasket_item += "		<span class='product-title'>"+handbasket_item_object['product_name']+"</span>";
-						handbasket_item += "		<span class='product-color'><span class='product-meta-title'>Color: </span>"+handbasket_item_object['product_color_name']+"</span>";
+						handbasket_item += "		<span class='product-color'><span class='product-meta-title'>Color: </span>"+handbasket_item_object['sku_color_name']+"</span>";
 						handbasket_item += "	</div>";
-						handbasket_item += "	<span class='product-price'>"+format_money(handbasket_item_object['product_option_price'])+"</span>";
+						handbasket_item += "	<span class='product-price'>"+format_money(handbasket_item_object['sku_price'])+"</span>";
 						handbasket_item += "	<span class='product-qty'>"+handbasket_item_object['product_qty']+"</span>";
-						handbasket_item += "	<span class='product-subtotal'>"+format_money(handbasket_item_object['product_qty'] * handbasket_item_object['product_option_price'])+"</span>";
+						handbasket_item += "	<span class='product-subtotal'>"+format_money(handbasket_item_object['product_qty'] * handbasket_item_object['sku_price'])+"</span>";
 						handbasket_item += " 	<a href='javascript:void(0);' class='btn remove-handbasket-item'>x</a>";
 						handbasket_item += "</div>";
 				// Place item in basket
 				handbasket_items += handbasket_item;
 			}
+
+
 
 			// Generate totals & tax
 			var tax_rate_dollars = to_market_scripts.tax_rate * handbasket_subtotal;
@@ -102,8 +109,54 @@ jQuery( document ).ready( function($) {
 		} else if ( type === 'raw' ) {
 			return handbasket_items;
 		}
-
 	}
+
+	// # Determine which sku has been selected
+	var determine_selected_sku = function() {
+		var selected_sku_options = {};
+		$('.user-selectable-option').each(function() {
+			// Set their option type and values to the object
+			selected_sku_options[$(this).data('sku-option-type')] = $(this).val();
+		});
+		$('.descriptor').removeClass('selected');
+		$('.descriptor').each(function() {
+			// Set descriptor switch here
+			var desired_descriptor = false;
+			// Using this object, find the appropriate descriptor to select
+			for ( var key in selected_sku_options ) {
+				// If each of the values of the data in this descriptor match the values
+				// of data in the selected sku object...
+				if ( $(this).data(key) === selected_sku_options[key] ) {
+					// Determine that this may be the descriptor.
+					desired_descriptor = true;
+				} else {
+					desired_descriptor = false;
+				}
+			}
+			// Find the descriptor
+			if ( desired_descriptor === true ) {
+				$(this).addClass('selected');
+			}
+		});
+	}
+
+	// # Returns the sku name
+	var get_selected_sku = function() {
+		var selected_sku = $(document).find('.descriptor.selected').data('sku');
+		return selected_sku;
+	}
+
+	// # Determines which sku has been selected and shows displays
+	//   various options to users (e.g. change in price, maybe change of picture)
+	var redraw_selected_sku_options = function() {
+		determine_selected_sku();
+		$('[data-sku]').not('.descriptor').removeClass('selected');
+		$('[data-sku="'+get_selected_sku()+'"]').addClass('selected');
+	}
+
+	// #
+	// # HandBasket Event Handlers
+	// #
 
 	// # Toggle View of Hand Basket
 	$(document).on('click', '[data-toggle="hand-basket"]', function() {
@@ -114,7 +167,7 @@ jQuery( document ).ready( function($) {
 	// # Remove product from cart
 	$(document).on( 'click', '.remove-handbasket-item', function() {
 		// Remove from local storage
-		simpleStorage.deleteKey( $(this).parent().data('local-storage-key') );
+		simpleStorage.deleteKey( $(this).parent().data('sku') );
 		// Hide DOM element
 		$(this).parent().animate( { opacity:0 }, 500, function() {
 			$(this).css('display','none');
@@ -127,57 +180,22 @@ jQuery( document ).ready( function($) {
 		});
 	});
 
- /**
-	* jQuery Click Options (this probably just needs to be integrated into code)
-	* @requires jQuery
-	* @desc Allow users to make dropdown/radio selections just by clicking! Ideal
-	* for selecting options in shopping carts. All clickable elements are
-	* created in JS so if JS fails, no worries!
-	*/
-	$.fn.clickop = function() {
-		// Hide <select> element and title
-		this.hide();
-		// Create container for selections
-		this.after('<div class="jquery-color-selection"><ul></ul></div>');
-		// Grab available color options and create buttons in color container
-		this.children('option').each( function() {
-			$('.jquery-color-selection ul').append('<li><a href="#" data-color-value="'+$(this).val()+'" data-checkout-image-preview="'+$(this).data('checkout-image-preview')+'" class="'+$(this).val()+'" style="background-color:'+$(this).data('background-color')+'" data-option-sold-out="'+$(this).data('option-sold-out')+'">'+$(this).val()+'</a></li>').addClass('capitalize');
-		});
-		// Select the appropriate color value
-		$(document).on( 'click', '.jquery-color-selection a', function() {
-
-			// # Disable product selection for sold out options.
-			if ( $(this).data('option-sold-out') == 1 ) {
-				return false;
-			}
-
-			// # Affect the <select> element
-			$('.jquery-color-selection a').removeClass('selected');
-			$(this).addClass('selected');
-			var colorValue = $(this).attr('data-color-value');
-			var previewUrl = $(this).attr('data-checkout-image-preview');
-			$('.product-color-selection').val(colorValue); // Update select with latest value
-
-			// # Re-update add-to cart button
-			// Retrieve the data value we wish to retrieve and update
-			var option_target = $('.product-color-selection').data('target');
-			// Retrieve option values
-			var option_new_data = $('.product-color-selection').find('option:selected').val();
-			console.log(option_new_data);
-			// Update #add-to-handbasket values
-			$('.add-handbasket-item').attr( option_target, option_new_data);
-
-			// # Update image url values
-			var option_target = 'data-product_checkout_image_preview';
-			var option_new_data = $('.product-color-selection').find('option:selected').data('checkout-image-preview');
-			$('.add-handbasket-item').attr( option_target, option_new_data);
-
+	// # Change the hidden select element to the appropriate value
+	$(document).on( 'click', '.jquery-color-selection a', function() {
+		// Disable product selection for sold out options.
+		if ( $(this).data('option-sold-out') == 1 ) {
 			return false;
-		});
-	}
-
-	// # The <select> element you wish to click instead.
-	$('.product-color-selection').clickop();
+		}
+		// Affect the <select> element
+		$('.jquery-color-selection a').removeClass('selected');
+		$(this).addClass('selected');
+		var colorValue = $(this).data('color-value');
+		//var previewUrl = $(this).attr('data-checkout-image-preview');
+		$('select.product-color-selection').val(colorValue); // Update select with latest value
+		// Redraw the newly select sku option
+		redraw_selected_sku_options();
+		return false;
+	});
 
 	// # Users Add Products to Hand Basket
 	$(document).on('click', '.add-handbasket-item', function() {
@@ -186,24 +204,15 @@ jQuery( document ).ready( function($) {
 		var handbasket = simpleStorage.index();
 		var handbasket_item_count = handbasket.length;
 
-		// Compile product values based on data attributes
-		var product_options = $(this).data();
-		console.log(product_options);
-
-		// Look through array. If any are left blank, error out.
-		for ( var key in product_options ) {
-			if ( product_options[key] ==  '' ) {
-				console.log('Select an option');
-				return;
-			}
-		}
+		// Compile product values based on the selected sku
+		$(document).find('.descriptor.selected').attr( 'data-product_qty', $('.product-qty-selection').val() );
+		var product_options = $(document).find('.descriptor.selected').data();
+		console.log( product_options );
 
 		// Duplicate handling
-		// Essentially we can have two of the same products with different options.
-		// If the product is not a duplicate of an existing product.
-		if ( handbasket.indexOf( product_options['product_name'] + ' ' + product_options['product_color_name'] ) < 0 ) {
-			// Add product to basket (store as object) and set expiration for two days
-			var new_product = simpleStorage.set( product_options['product_name'] + ' ' + product_options['product_color_name'] , product_options, { ttl: 172800000 });
+		// Add to cart, if product SKU does not exist
+		if ( handbasket.indexOf( product_options['sku'] ) ) {
+			var new_product = simpleStorage.set( product_options['sku'], product_options, { ttl: 172800000 });
 			// Destroy existing cart, refresh our handbasket and re-display
 			$('[data-toggle="hand-basket"]').popover('destroy');
 			refresh_handbasket();
@@ -214,13 +223,31 @@ jQuery( document ).ready( function($) {
 
 	});
 
+	//simpleStorage.flush();
+
+	// # Using jQuery, allow users to manipulate a select with click options.
+	// Hide <select> element and title
+	$('.product-color-selection').hide();
+	// Create container for selections
+	$('.product-color-selection').after('<div class="jquery-color-selection"><ul></ul></div>');
+	// Grab available color options and create buttons in color container
+	$('.product-color-selection').children('option').each( function() {
+		//$('.jquery-color-selection ul').append('<li><a href="#" data-color-value="'+$(this).val()+'" data-checkout-image-preview="'+$(this).data('checkout-image-preview')+'" class="'+$(this).val()+'" style="background-color:'+$(this).data('background-color')+'" data-option-sold-out="'+$(this).data('option-sold-out')+'">'+$(this).val()+'</a></li>').addClass('capitalize');
+		$('.jquery-color-selection ul').append('<li><a href="#" data-color-value="'+$(this).val()+'" class="'+$(this).val()+'" style="background-color:'+$(this).data('sku-color')+'" data-option-sold-out="'+$(this).data('option-sold-out')+'">'+$(this).val()+'</a></li>');
+	});
+
+	// # Determine default sku on page load
+	redraw_selected_sku_options();
+
+
+
 	/**
 	 * Checkout
+	 * The modal popover, processing of address and payment script.
 	 * Requires: jQuery, BootstrapJS (Modal), Stripe & EasyPost
 	 */
 
 	// # Checkout Testing Parameters
-	// @param indicate which steps require input
 	var allow_dev_inputs = true;
 	function insert_dev_inputs ( steps ) {
 		// Step "Basic"

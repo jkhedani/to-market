@@ -20,3 +20,19 @@ Coming soon!
 
 ### Updating
 Coming soon!
+
+### Creating new products
+
+1. Navigate to the admin toolbar and hover over "+ New" then selecting the
+   Products option.
+
+2. Fill in on the appropriate fields for your product.
+
+3. If any of the fields in "Product Details" vary within the same product, ask
+   your site admin to move them over to product options for you. We've taken the
+   convention over configuration approach to create less options for you but if
+   you need more flexibility go for it! The way we conceptualize each product
+   option is as follows: for each product you would create a SKU for, you would
+   create a product option.
+
+4. Update and that's it!
