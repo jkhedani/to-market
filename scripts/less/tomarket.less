@@ -15,11 +15,13 @@ html body {
   // "Shoppping Cart" icon
   [data-toggle="hand-basket"] {
     cursor: pointer;
-    background: url('../../media/cart-icon.png') no-repeat;
+    color: #FFF;
+    font-size: 25px;
+    //background: url('../../media/cart-icon.png') no-repeat;
     float: right;
     width: 27px;
     height: 21px;
-    text-indent: -9999px;
+    //text-indent: -9999px;
     margin-top: 5px;
   }
 
@@ -28,7 +30,8 @@ html body {
     left: auto !important;
     top: 0 !important;
     right: 0 !important;
-    margin-top: -20px;
+    padding: 0;
+    margin-top: 0px;
     margin-right: 0;
   }
 
@@ -143,10 +146,8 @@ html body {
 @media ( min-width: 768px ) { // and up
   html body {
     .popover.hand-basket {
-      //top: 94px !important;
       min-width: 565px;
-      //padding: 0;
-      margin-top: -20px;
+      margin-top: 0px;
       margin-right: 20px;
     }
   }
@@ -154,6 +155,9 @@ html body {
 
 @media ( min-width: 500px ) {
   html body {
+    [data-toggle="hand-basket"] {
+      color: @darkGray;
+    }
     .hand-basket-preview-legend {
       display: block;
     }

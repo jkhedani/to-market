@@ -119,11 +119,11 @@ html body .selected {
 }
 html body [data-toggle="hand-basket"] {
   cursor: pointer;
-  background: url('../../media/cart-icon.png') no-repeat;
+  color: #FFF;
+  font-size: 25px;
   float: right;
   width: 27px;
   height: 21px;
-  text-indent: -9999px;
   margin-top: 5px;
 }
 html body .popover.hand-basket {
@@ -131,7 +131,8 @@ html body .popover.hand-basket {
   left: auto !important;
   top: 0 !important;
   right: 0 !important;
-  margin-top: -20px;
+  padding: 0;
+  margin-top: 0px;
   margin-right: 0;
 }
 html body .hand-basket,
@@ -430,11 +431,14 @@ html body #checkout .checkoutReview {
 @media (min-width: 768px) {
   html body .popover.hand-basket {
     min-width: 565px;
-    margin-top: -20px;
+    margin-top: 0px;
     margin-right: 20px;
   }
 }
 @media (min-width: 500px) {
+  html body [data-toggle="hand-basket"] {
+    color: #737a7d;
+  }
   html body .hand-basket-preview-legend {
     display: block;
   }
