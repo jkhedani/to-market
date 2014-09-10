@@ -254,9 +254,10 @@ jQuery( document ).ready( function($) {
 		function input_step_basic_dev_data() {
 			$('input[name="customer-name"]').val('Justin Hedani');
 			$('input[name="customer-email"]').val('jkhedani@gmail.com');
+			$('input[name="customer-phone"]').val('808-349-0746');
 			$('input[data-stripe="address-line1"], input[data-easypost="shipping-address-line1"]').val('3927 Koko Drive');
 			$('input[data-stripe="address-city"], input[data-easypost="shipping-address-city"]').val('Honolulu');
-			$('input[data-stripe="address-zipcode"], input[data-easypost="shipping-address-zipcode"]').val('96816');
+			$('input[data-stripe="address-zip"], input[data-easypost="shipping-address-zip"]').val('96816');
 			$('input[data-stripe="address-state"], input[data-easypost="shipping-address-state"]').val('HI');
 			$('input[data-stripe="address-country"], input[data-easypost="shipping-address-country"]').val('USA');
 		}
@@ -437,9 +438,6 @@ jQuery( document ).ready( function($) {
 		}
 	}
 
-
-
-
 	/**
 	 * Process checkout
 	 * Submit shipping infor, create stripe token,
@@ -462,8 +460,11 @@ jQuery( document ).ready( function($) {
 		// 	shipping_address_object[ shipping_address[i]['name'] ] = shipping_address[i]['value'];
 		// }
 
-		// ### Product Info
-		// var shipping_address = $('#shipping-address').serialize();
+		// ### Basket Info
+		var basket_contents = {};
+		for ( i = 0; i < simpleStorage.index().length; i++ ) {
+			basket_contents[ simpleStorage.index()[i] ] = simpleStorage.get( simpleStorage.index()[i] );
+		}
 
 		// ### Stripe Construct payment token
 		Stripe.setPublishableKey(to_market_scripts.stripe_publishable_key); // # Present Publishable API Key
@@ -494,7 +495,9 @@ jQuery( document ).ready( function($) {
 					basicinfo: basic_info,
 					shippingaddress: shipping_address,
 					stripetoken: stripe_token,
-					//nonce: shopping_cart_scripts.nonce,
+					basketcontents: basket_contents,
+					redirectURL: document.URL,
+					nonce: to_market_scripts.nonce,
 				}, function(response) {
 					if ( response.success === true ) {
 						$(this).parents('.checkout-step').find('.overlay.loading').hide(); // Show loading message

@@ -869,6 +869,7 @@ html body #checkout .checkoutReview {
   position: relative;
   padding: 38px 0 0;
   background: url('../../media/checkout-header-bg.jpg');
+  background-size: cover;
   -webkit-border-radius: 8px 8px 0 0;
   -moz-border-radius: 8px 8px 0 0;
   border-radius: 8px 8px 0 0;
@@ -990,9 +991,9 @@ html body #checkout .checkoutReview {
 @media (min-width: 500px) {
   #checkout .checkout-header,
   #checkout .checkout-step {
-    width: 565px;
+    width: 420px;
     margin: 0 auto;
-    max-width: 565px;
+    max-width: 435px;
   }
   #checkout .checkout-header {
     margin: 10% auto 0;

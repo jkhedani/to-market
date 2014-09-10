@@ -46,7 +46,7 @@ function tomarket_enqueue_scripts() {
   wp_enqueue_script( 'to-market-scripts', $path_to_plugin . '/scripts/js/tomarket.js', array('jquery','json2') );
   wp_localize_script( 'to-market-scripts', 'to_market_scripts', array(
     'ajaxurl' => admin_url('admin-ajax.php',$protocol),
-    'nonce' => wp_create_nonce('tomarket_scripts_nonce'),
+    'nonce' => wp_create_nonce('to_market_scripts_nonce'),
     'tax_rate' => get_field('tax_rate', 'option'),
     'donation_promo_text' => get_field('donation_promo_text', 'option'),
     'shipping_text' => get_field('shipping_text', 'option'),
@@ -164,6 +164,11 @@ function render_checkout() {
             <div class="input-group-addon"><i class="fa fa-at"></i></div>
             <input type="text"  class="customer-email form-control" size="20" autocomplete="off" class="email" name="customer-email" placeholder="Email Address" />
           </div>
+          <div class="input-group">
+            <label>'. __('Phone Number', 'litton_bags') .'</label>
+            <div class="input-group-addon"><i class="fa fa-phone"></i></div>
+            <input type="text"  class="customer-phone form-control" size="20" autocomplete="off" class="phone" name="customer-phone" placeholder="808-123-4567" />
+          </div>
         </form>
 
         <form action="" method="POST" id="billing-address">
@@ -218,11 +223,11 @@ function render_checkout() {
           </div>
           <div class="input-group">
             <label>'. __('State', 'litton_bags') .'</label>
-            <input type="text" size="20" autocomplete="off" class="state" data-easypost="shipping-address-state" name="shipping-address-state" placeholder="Zipcode" />
+            <input type="text" size="20" autocomplete="off" class="state" data-easypost="shipping-address-state" name="shipping-address-state" placeholder="State" />
           </div>
           <div class="input-group">
             <label>'. __('Zip Code', 'litton_bags') .'</label>
-            <input type="text" size="20" autocomplete="off" class="zip-code" data-easypost="shipping-address-zip" name="shipping-address-zip" placeholder="State" />
+            <input type="text" size="20" autocomplete="off" class="zip-code" data-easypost="shipping-address-zip" name="shipping-address-zip" placeholder="Zipcode" />
           </div>
           <div class="input-group">
             <label>'. __('Country', 'litton_bags') .'</label>
@@ -359,45 +364,38 @@ function verify_checkout_charge_amount( $basketitems ) {
   // # Retrieve submitted cart contents (sku + qty)
 }
 
-function easypost_verify_address( $address ) {
-  global $path_to_plugin;
-  require_once( __DIR__ . "/lib/EasyPost/lib/easypost.php");
-  \EasyPost\EasyPost::setApiKey( set_easypost_api_key() );
-  //$address_values = $_REQUEST['shipping_address'];
-  // $nonce = $_REQUEST['nonce'];
-  // if ( !wp_verify_nonce($nonce, 'handbasket_scripts_nonce')) die(__('Busted.') );
-  //
-  $address = \EasyPost\Address::create(array(
-    'name' => 'Dr. Steve Brule',
-    'street1' => '179 N Harbor Dr',
-    'city' => 'Redondo Beach',
-    'state' => 'CA',
-    'zip' => '90277',
-    'country' => 'US',
-    'email' => 'dr_steve_brule@gmail.com'
-  ));
-  $verified_address = $address->verify();
-  return $verfied_address;
-  //
-  // $response = json_encode(array(
-  //   'verified_address' => $verified_address,
-  // ));
-  //
-  // // Construct and send the response
-  // header("content-type: application/json");
-  // echo $response;
-  // exit;
-}
-//add_action( 'init', 'easypost_verify_address' );
+
 
 function process_checkout() {
+
+    // ### Nonce Verification
+    $nonce = $_REQUEST['nonce'];
+    if ( !wp_verify_nonce($nonce, 'to_market_scripts_nonce')) die(__('Busted.') );
 
     // ### Setup Data
     $basicinfo = $_REQUEST['basicinfo'];
     $shippingaddress = $_REQUEST['shippingaddress'];
     $stripetoken = $_REQUEST['stripetoken'];
+    $basketcontents = $_REQUEST['basketcontents'];
 
-    ### Verify Address via EasyPost
+    // ### Determine True Cost of Basket
+    $subtotal = 0;
+    foreach ( $basketcontents as $sku => $data ) {
+      $post_id = $data['post_id'];
+      if ( have_rows('product_skus', $post_id ) ) {
+        while ( have_rows('product_skus', $post_id) ) : the_row();
+          // if the sku matches the current product
+          if ( get_sub_field('sku') === $sku ) {
+            $subtotal = $subtotal + ( get_sub_field('sku_price') * $data['product_qty'] );
+          }
+        endwhile;
+      } else {
+        // Exit and send message back (someone fucking with the system)
+      }
+    }
+    $grandtotal = floor( $subtotal + ($subtotal * get_field( 'tax_rate', 'option' )) );
+
+    // ### Verify Address via EasyPost
     global $path_to_plugin;
     require_once( __DIR__ . "/lib/EasyPost/lib/easypost.php");
     \EasyPost\EasyPost::setApiKey( set_easypost_api_key() );
@@ -410,7 +408,6 @@ function process_checkout() {
       'country' => $shippingaddress['shipping-address-country'],
       'email' => $basicinfo['customer-email'],
     ));
-
     try {
       $verified_address = $shipping_address->verify();
     } catch(Exception $e) {
@@ -421,19 +418,82 @@ function process_checkout() {
     // ### Stripe: Attempt to charge card
     // If their shipping adress is valid
     if ( isset($verified_address) && !empty($verified_address) ) {
-
       require_once( __DIR__ . '/lib/Stripe/lib/Stripe.php'); // Load Stripe Client Library (PHP)
       Stripe::setApiKey( stripe_api_key('secret') ); // # Present Secret API Key
-
       try {
         $charge = Stripe_Charge::create( array(
-          "amount" => 38639, // amount in cents, again
+          "amount" => $grandtotal, // amount in cents, again
           "currency" => "usd",
           "card" => $stripetoken,
           "description" => $basicinfo['customer-email']
         ));
 
-        $redirect  = add_query_arg( array('checkout' => 'yes', 'result' => 'success'), $_POST['redirect']);
+        // ### If charge is successful, create shipping label
+        try {
+
+          $to_address = \EasyPost\Address::create(
+            array(
+              "name"    => $basicinfo['customer-name'],
+              "street1" => $shippingaddress['shipping-address-line1'],
+              "street2" => $shippingaddress['shipping-address-line2'],
+              "city"    => $shippingaddress['shipping-address-city'],
+              "state"   => $shippingaddress['shipping-address-state'],
+              "zip"     => $shippingaddress['shipping-address-zip'],
+              "phone"   => $basicinfo['customer-phone']
+            )
+          );
+          $from_address = \EasyPost\Address::create(
+            array(
+              "company" => get_field( 'dba', 'option'),
+              "street1" => get_field( 'ship_from_street1', 'option'),
+              "city"    => get_field( 'ship_from_city', 'option'),
+              "state"   => get_field( 'ship_from_state', 'option'),
+              "zip"     => get_field( 'ship_from_zip_code', 'option'),
+              "phone"   => "620-123-4567"
+            )
+          );
+
+          //@todo: ensure correct package details are inserted for each product
+          // ! disregard throw in products.
+          $parcel = \EasyPost\Parcel::create(
+              array(
+                  "predefined_package" => "LargeFlatRateBox",
+                  "weight" => 76.8
+              )
+          );
+          $shipment = \EasyPost\Shipment::create(
+              array(
+                  "to_address"   => $to_address,
+                  "from_address" => $from_address,
+                  "parcel"       => $parcel
+              )
+          );
+
+          $shipment->buy($shipment->lowest_rate());
+          error_log($shipment->postage_label->label_url);
+
+
+          $redirect  = add_query_arg( array('checkout' => 'yes', 'step' => '4'), $_REQUEST['redirectURL']);
+          error_log( $redirect );
+          // ### Display appropriate message
+          // @todo: redirect fussy since we are making an ajax call
+          if ( isset( $redirect ) ) {
+            error_log('as');
+            wp_redirect( $redirect );
+            exit;
+          }
+
+        } catch( Exception $e ) {
+          error_log($e->getMessage());
+          // Change email messages here.
+            // One email to litton notifying her shipping label not printed.
+            // One email to customer letting them know product will be shipped
+            // ASAP and a tracking number will be emailed as well.
+        }
+
+        // send admin and customer emails
+        // click fourth tab and show success message.
+
 
       } catch(Stripe_CardError $e) {
         // The card has been declined
@@ -442,24 +502,8 @@ function process_checkout() {
 
     } // if address is verified
 
-    // ### If payment is successful, create shipping label.
-    // Charge successful!
-    // 1. Send customer email
-    // 2. Send litton email
 
 
-    // ### Display appropriate message
-    if ( isset( $redirect ) ) {
-      wp_redirect( $redirect );
-      exit;
-    }
-
-    // ### process cc
-      // if failure click second tab and show error message
-      // if success
-        // create shipping label
-        // send admin and customer emails
-        // click fourth tab and show success message.
 }
 add_action('wp_ajax_nopriv_process_checkout', 'process_checkout');
 add_action('wp_ajax_process_checkout', 'process_checkout');
