@@ -182,23 +182,26 @@ function render_checkout() {
             <label>'. __('Address Line 2', 'litton_bags') .'</label>
             <input type="text" class="form-control" size="20" autocomplete="off" data-stripe="address-line2" data-shipping-target="shipping-address-line2" class="address" placeholder="Address Line 2" />
           </div>
-          <div class="input-group">
-            <label>'. __('City', 'litton_bags') .'</label>
-            <div class="input-group-addon"><i class="fa fa-building"></i></div>
-            <input type="text" class="form-control" size="20" autocomplete="off" data-stripe="address-city" data-shipping-target="shipping-address-city" class="address" placeholder="City" />
+          <div class="input-row">
+            <div class="input-group city">
+              <label>'. __('City', 'litton_bags') .'</label>
+              <div class="input-group-addon"><i class="fa fa-building"></i></div>
+              <input type="text" class="form-control" size="20" autocomplete="off" data-stripe="address-city" data-shipping-target="shipping-address-city" class="address" placeholder="City" />
+            </div>
+            <div class="input-group zip">
+              <label>'. __('Zip Code', 'litton_bags') .'</label>
+              <input type="text" size="20" autocomplete="off" class="zip-code" data-stripe="address-zip" data-shipping-target="shipping-address-zip" class="address" placeholder="Zipcode" />
+            </div>
+            <div class="input-group state">
+              <label>'. __('State', 'litton_bags') .'</label>
+              <input type="text" size="5" autocomplete="off" class="state" data-stripe="address-state" data-shipping-target="shipping-address-state" class="address" placeholder="State" />
+            </div>
+            <div class="input-group country">
+              <label>'. __('Country', 'litton_bags') .'</label>
+              <input type="text" size="7" autocomplete="off" class="country" data-stripe="address-country" data-shipping-target="shipping-address-country" class="address" placeholder="USA" />
+            </div>
           </div>
-          <div class="input-group">
-            <label>'. __('Zip Code', 'litton_bags') .'</label>
-            <input type="text" size="20" autocomplete="off" class="zip-code" data-stripe="address-zip" data-shipping-target="shipping-address-zip" class="address" placeholder="Zipcode" />
-          </div>
-          <div class="input-group">
-            <label>'. __('State', 'litton_bags') .'</label>
-            <input type="text" size="5" autocomplete="off" class="state" data-stripe="address-state" data-shipping-target="shipping-address-state" class="address" placeholder="State" />
-          </div>
-          <div class="input-group">
-            <label>'. __('Country', 'litton_bags') .'</label>
-            <input type="text" size="7" autocomplete="off" class="country" data-stripe="address-country" data-shipping-target="shipping-address-country" class="address" placeholder="USA" />
-          </div>
+
           <div class="input-group">
             <input id="show-shipping-address-fields" type="checkbox" />
             <span class="formHelperText">My shipping address is different from my billing address.</span>
@@ -217,27 +220,29 @@ function render_checkout() {
             <label>'. __('Address Line 2', 'litton_bags') .'</label>
             <input type="text" size="20" autocomplete="off" data-easypost="shipping-address-line2" name="shipping-address-line2" class="address optional" placeholder="Address Line 2" />
           </div>
-          <div class="input-group">
-            <label>'. __('City', 'litton_bags') .'</label>
-            <input type="text" size="20" autocomplete="off" data-easypost="shipping-address-city" name="shipping-address-city" placeholder="City" />
-          </div>
-          <div class="input-group">
-            <label>'. __('State', 'litton_bags') .'</label>
-            <input type="text" size="20" autocomplete="off" class="state" data-easypost="shipping-address-state" name="shipping-address-state" placeholder="State" />
-          </div>
-          <div class="input-group">
-            <label>'. __('Zip Code', 'litton_bags') .'</label>
-            <input type="text" size="20" autocomplete="off" class="zip-code" data-easypost="shipping-address-zip" name="shipping-address-zip" placeholder="Zipcode" />
-          </div>
-          <div class="input-group">
-            <label>'. __('Country', 'litton_bags') .'</label>
-            <input type="text" size="20" autocomplete="off" class="country" data-easypost="shipping-address-country" name="shipping-address-country" placeholder="USA" />
+          <div class="input-row">
+            <div class="input-group city">
+              <label>'. __('City', 'litton_bags') .'</label>
+              <input type="text" size="20" autocomplete="off" data-easypost="shipping-address-city" name="shipping-address-city" placeholder="City" />
+            </div>
+            <div class="input-group state">
+              <label>'. __('State', 'litton_bags') .'</label>
+              <input type="text" size="20" autocomplete="off" class="state" data-easypost="shipping-address-state" name="shipping-address-state" placeholder="State" />
+            </div>
+            <div class="input-group zip">
+              <label>'. __('Zip Code', 'litton_bags') .'</label>
+              <input type="text" size="20" autocomplete="off" class="zip-code" data-easypost="shipping-address-zip" name="shipping-address-zip" placeholder="Zipcode" />
+            </div>
+            <div class="input-group country">
+              <label>'. __('Country', 'litton_bags') .'</label>
+              <input type="text" size="20" autocomplete="off" class="country" data-easypost="shipping-address-country" name="shipping-address-country" placeholder="USA" />
+            </div>
           </div>
         </form>
 
       </div><!-- .modal-body -->
       <div class="checkout-footer">
-        <a href="#" class="mint">Next »</a>
+        <a href="#payment" data-target="2" class="checkout-next mint">Next »</a>
       </div>
       <!-- Message Overlay -->
       <div class="overlay loading"><i class="spinner medium"></i><div class="overlay-message-container"><h4>Validating Address</h4></div></div>
@@ -250,7 +255,7 @@ function render_checkout() {
       </div>
       <div class="modal-body">
         <form action="" method="POST" id="stripe-payment-form">
-          <legend>Card Information</legend>
+          <!-- <legend>Card Information</legend> -->
           <ul class="cc-icons">
             <li class="cc-icon visa"></li>
             <li class="cc-icon mastercard"></li>
@@ -277,14 +282,17 @@ function render_checkout() {
             <input type="text" class="card-exp-year" size="4" data-stripe="exp-year" data-numeric placeholder="YYYY" />
           </div>
 
-          <!-- Additonal/Hidden Form Parameters -->
+          <hr />
+
+          <p class="form-helper-text"><i class="fa fa-cc-stripe"></i>We proudly use <a href="http://stripe.com">Stripe</a> to securely process your payment information.</p>
+
           <input type="hidden" name="redirect" value="'. get_permalink() .'"/>
           <input type="hidden" name="form-type" value="stripe-payment" />
           '.wp_nonce_field( "stripe-payment" ).'
         </form>
       </div><!-- modal-body -->
       <div class="checkout-footer">
-        <a href="#" class="mint">Next</a>
+        <a href="#review" data-target="2" class="checkout-next mint">Next</a>
         <!-- <a class="paypal-checkout" href="javascript:void(0);" title="Checkout via Paypal instead." data-payment-method="paypal"><img src="'.get_stylesheet_directory_uri().'/lib/ToMarket/media/paypal-checkout-icon.png" alt="Checkout via Paypal instead." /></a> -->
       </div>
     </div><!-- end step 2 -->
@@ -473,15 +481,28 @@ function process_checkout() {
           error_log($shipment->postage_label->label_url);
 
 
-          $redirect  = add_query_arg( array('checkout' => 'yes', 'step' => '4'), $_REQUEST['redirectURL']);
-          error_log( $redirect );
+          // $redirect  = add_query_arg( array('checkout' => 'yes', 'step' => '4'), $_REQUEST['redirectURL']);
+          // error_log( $redirect );
           // ### Display appropriate message
           // @todo: redirect fussy since we are making an ajax call
-          if ( isset( $redirect ) ) {
-            error_log('as');
-            wp_redirect( $redirect );
-            exit;
-          }
+          // if ( isset( $redirect ) ) {
+          //   error_log('as');
+          //   wp_redirect( $redirect );
+          //   exit;
+          // }
+          /**
+           * Build the response...
+           */
+          $success = true;
+          $response = json_encode(array(
+            'success' => $success,
+            // 'errors' => $errors,
+          ));
+
+          // Construct and send the response
+          header("content-type: application/json");
+          echo $response;
+          exit;
 
         } catch( Exception $e ) {
           error_log($e->getMessage());

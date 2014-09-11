@@ -745,6 +745,33 @@ html body #checkout .checkoutReview {
   margin: 10px 0;
   font-size: 12px;
 }
+#checkout .input-row:before,
+#checkout .input-row:after {
+  content: " ";
+  display: table;
+}
+#checkout .input-row:after {
+  clear: both;
+}
+#checkout .input-row .input-group {
+  float: left;
+  margin-left: 2%;
+}
+#checkout .input-row .input-group:first-child {
+  margin: 0;
+}
+#checkout .input-row .input-group.city {
+  width: 42%;
+}
+#checkout .input-row .input-group.zip {
+  width: 20%;
+}
+#checkout .input-row .input-group.state {
+  width: 15%;
+}
+#checkout .input-row .input-group.country {
+  width: 16%;
+}
 #checkout .input-group {
   position: relative;
   margin-bottom: 10px;
@@ -784,28 +811,16 @@ html body #checkout .checkoutReview {
   margin: 0;
   width: 100%;
 }
-#checkout .input-group input[data-stripe="address-city"] {
-  width: 45%;
-}
-#checkout .input-group input[data-stripe="address-zip"] {
-  width: 25%;
-}
-#checkout .input-group input[data-stripe="address-state"] {
-  width: 15%;
-}
-#checkout .input-group input[data-stripe="address-country"] {
-  width: 12%;
-}
 #checkout .input-group input[data-stripe="cvc"] {
   width: 30%;
   text-align: center;
 }
 #checkout .input-group input[data-stripe="exp-month"] {
-  width: 30%;
+  width: 20%;
   text-align: center;
 }
 #checkout .input-group input[data-stripe="exp-year"] {
-  width: 36%;
+  width: 20%;
   text-align: center;
 }
 #checkout .input-group input[type='checkbox'] {
@@ -958,6 +973,11 @@ html body #checkout .checkoutReview {
   -moz-border-radius: 0 0 8px 8px;
   border-radius: 0 0 8px 8px;
 }
+#checkout .checkout-step .modal-header,
+#checkout .checkout-step .modal-body {
+  padding-left: 25px;
+  padding-right: 25px;
+}
 #checkout .checkout-step .modal-body {
   max-height: none;
 }
@@ -983,10 +1003,25 @@ html body #checkout .checkoutReview {
 }
 #checkout .checkout-step#message img {
   width: 400px;
-  margin: 20px 60px 20px;
+  margin: 20px 0px 20px;
+}
+#payment.checkout-step p.form-helper-text {
+  line-height: 1.2;
+}
+#payment.checkout-step i.fa-cc-stripe {
+  float: left;
+  font-size: 25px;
+  margin: 2px 10px 0 0;
 }
 #shipping-address {
   display: none;
+}
+#review.checkout-step .product-subtotal {
+  display: none !important;
+}
+#review.checkout-step a.remove-handbasket-item {
+  width: 30px !important;
+  margin: -2px 0 0 0 !important;
 }
 @media (min-width: 500px) {
   #checkout .checkout-header,

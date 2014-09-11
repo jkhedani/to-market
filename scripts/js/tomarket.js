@@ -223,7 +223,13 @@ jQuery( document ).ready( function($) {
 
 	});
 
-	//simpleStorage.flush();
+	// # Handbasket inner popover (primarily used ofr shipping)
+	$(document).on('shown.bs.popover',function() {
+		$('.shipping-popover-trigger').tooltip({
+			'placement' : 'left',
+		});
+	});
+
 
 	// # Using jQuery, allow users to manipulate a select with click options.
 	// Hide <select> element and title
@@ -320,6 +326,13 @@ jQuery( document ).ready( function($) {
 		var target_step = $(this).data('target');
 		$('#checkout .checkout-step').removeClass('current').hide();
 		$('#checkout [data-step="'+target_step+'"]').addClass('current').show();
+		return false;
+	});
+
+	// # Create event listener for next buttons
+	$(document).on('click', 'a.checkout-next', function() {
+		var target_step = $(this).data('target');
+		$('ul.checkout-tabs li a[data-target="'+target_step+'"]').click();
 		return false;
 	});
 
@@ -500,7 +513,10 @@ jQuery( document ).ready( function($) {
 					nonce: to_market_scripts.nonce,
 				}, function(response) {
 					if ( response.success === true ) {
-						$(this).parents('.checkout-step').find('.overlay.loading').hide(); // Show loading message
+						window.location.replace( document.URL + "/?checkout=yes&step=4" );
+						// window.location.href = document.URL + "/?checkout=yes&step=4";
+						// $(this).parents('.checkout-step').find('.overlay.loading').hide(); // Show loading message
+						// $('ul.checkout-tabs li a[data-step="4"]').click();
 					}
 				});
 				return false;
