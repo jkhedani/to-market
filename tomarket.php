@@ -91,7 +91,7 @@ if ( function_exists( 'acf_add_options_sub_page' ) && function_exists( 'get_fiel
 }
 
 // # Utilities
-require_once( __DIR__ . '/lib/ToMarket/Util.php');
+require_once( $path_to_plugin . '/lib/ToMarket/Util.php');
 
 // # PayPal
 // require_once( get_stylesheet_directory() . '/lib/PayPal/payments/method-paypal.php' );
