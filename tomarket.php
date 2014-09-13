@@ -9,7 +9,7 @@
 
 // # Store path to 'plugin' separate as this 'plugin' currently lives in the
 // theme. Note there is no trailing slash.
-$path_to_plugin = get_stylesheet_directory_uri() . '/lib/ToMarket';
+$path_to_plugin_uri = get_stylesheet_directory_uri() . '/lib/ToMarket';
 
 /**
  * Enqueue Scripts, Libraries & Settings
@@ -17,33 +17,33 @@ $path_to_plugin = get_stylesheet_directory_uri() . '/lib/ToMarket';
  */
 function tomarket_enqueue_scripts() {
 
-  global $path_to_plugin;
+  global $path_to_plugin_uri;
   // Assign the appropriate protocol if necessary.
   $protocol = 'http:';
   if ( !empty($_SERVER['HTTPS']) ) $protocol = 'https:';
 
   // Bootstrap Scripts & Styles
-  wp_enqueue_style( 'bootstrap-styles', $path_to_plugin . '/scripts/css/bootstrap/bootstrap.css' );
-  //wp_enqueue_style( 'bootstrap-forms-styles', $path_to_plugin . '/scripts/css/bootstrap/forms.min.css' );
-  wp_enqueue_script( 'bootstrap-transition-script', $path_to_plugin .'/scripts/js/bootstrap/transition.js', array(), false, true );
-  wp_enqueue_script( 'bootstrap-modal-script', $path_to_plugin .'/scripts/js/bootstrap/modal.js', array(), false, true );
-  wp_enqueue_script( 'bootstrap-tooltip-script', $path_to_plugin .'/scripts/js/bootstrap/tooltip.js', array(), false, true );
-  wp_enqueue_script( 'bootstrap-popover-script', $path_to_plugin .'/scripts/js/bootstrap/popover.js', array(), false, true );
+  wp_enqueue_style( 'bootstrap-styles', $path_to_plugin_uri . '/scripts/css/bootstrap/bootstrap.css' );
+  //wp_enqueue_style( 'bootstrap-forms-styles', $path_to_plugin_uri . '/scripts/css/bootstrap/forms.min.css' );
+  wp_enqueue_script( 'bootstrap-transition-script', $path_to_plugin_uri .'/scripts/js/bootstrap/transition.js', array(), false, true );
+  wp_enqueue_script( 'bootstrap-modal-script', $path_to_plugin_uri .'/scripts/js/bootstrap/modal.js', array(), false, true );
+  wp_enqueue_script( 'bootstrap-tooltip-script', $path_to_plugin_uri .'/scripts/js/bootstrap/tooltip.js', array(), false, true );
+  wp_enqueue_script( 'bootstrap-popover-script', $path_to_plugin_uri .'/scripts/js/bootstrap/popover.js', array(), false, true );
 
   // HandBasket
-  wp_enqueue_script( 'simpleStorage-script', $path_to_plugin . '/scripts/js/simpleStorage.js', array('jquery','json2') );
+  wp_enqueue_script( 'simpleStorage-script', $path_to_plugin_uri . '/scripts/js/simpleStorage.js', array('jquery','json2') );
   // Stripe
   if ( get_field( 'stripe_api_mode', 'option' ) === true ) {
     $stripe_publishable_api_key = get_field( 'stripe_live_publishable_api_key', 'option' ); // Use Test API Key for Stripe Processing
   } else {
     $stripe_publishable_api_key = get_field( 'stripe_test_publishable_api_key', 'option' ); // Use Test API Key for Stripe Processing
   }
-  wp_enqueue_script( 'stripejs-script', $path_to_plugin . '/scripts/js/stripe/stripejs-v2.js', array(), false, true );
+  wp_enqueue_script( 'stripejs-script', $path_to_plugin_uri . '/scripts/js/stripe/stripejs-v2.js', array(), false, true );
 
   // To Market Scripts & Styles
   // Note: Currently all scripts share the same ajax nonce.
-  wp_enqueue_style( 'to-market-styles', $path_to_plugin . '/scripts/css/tomarket.css' );
-  wp_enqueue_script( 'to-market-scripts', $path_to_plugin . '/scripts/js/tomarket.js', array('jquery','json2') );
+  wp_enqueue_style( 'to-market-styles', $path_to_plugin_uri . '/scripts/css/tomarket.css' );
+  wp_enqueue_script( 'to-market-scripts', $path_to_plugin_uri . '/scripts/js/tomarket.js', array('jquery','json2') );
   wp_localize_script( 'to-market-scripts', 'to_market_scripts', array(
     'ajaxurl' => admin_url('admin-ajax.php',$protocol),
     'nonce' => wp_create_nonce('to_market_scripts_nonce'),
@@ -53,20 +53,20 @@ function tomarket_enqueue_scripts() {
     'stripe_publishable_key' => $stripe_publishable_api_key,
   ));
 
-  // wp_enqueue_script( 'handbasket-scripts', $path_to_plugin . '/lib/HandBasket/handbasket.js', array('jquery','json2'), true );
+  // wp_enqueue_script( 'handbasket-scripts', $path_to_plugin_uri . '/lib/HandBasket/handbasket.js', array('jquery','json2'), true );
   // wp_localize_script( 'handbasket-scripts', 'handbasket_scripts', array(
   //   'ajaxurl' => admin_url('admin-ajax.php',$protocol),
   //   'nonce' => wp_create_nonce('handbasket_scripts_nonce')
   // ));
 
 
-  // wp_enqueue_script( 'stripe-processing', $path_to_plugin . '/scripts/js/stripe/payments.js', array('jquery'));
+  // wp_enqueue_script( 'stripe-processing', $path_to_plugin_uri . '/scripts/js/stripe/payments.js', array('jquery'));
   // wp_localize_script('stripe-processing', 'stripe_vars', array(
   //   'publishable_key' => $stripe_publishable_api_key,
   // ));
 
   // EasyPost
-  // wp_enqueue_script( 'easypost-scripts', $path_to_plugin . '/scripts/js/easypost/easypost.js', array('jquery'));
+  // wp_enqueue_script( 'easypost-scripts', $path_to_plugin_uri . '/scripts/js/easypost/easypost.js', array('jquery'));
   // wp_localize_script('easypost-scripts', 'easypost_vars', array(
   //   'nonce' => wp_create_nonce('easypost_scripts_nonce')
   // ));
@@ -91,7 +91,7 @@ if ( function_exists( 'acf_add_options_sub_page' ) && function_exists( 'get_fiel
 }
 
 // # Utilities
-require_once( __DIR__ . '/lib/ToMarket/Util.php');
+require_once( dirname( __FILE__ ) . '/lib/ToMarket/Util.php');
 
 // # PayPal
 // require_once( get_stylesheet_directory() . '/lib/PayPal/payments/method-paypal.php' );
@@ -104,10 +104,10 @@ require_once( __DIR__ . '/lib/ToMarket/Util.php');
  * Checkout Functions
  */
 function render_checkout() {
-  global $path_to_plugin;
+  global $path_to_plugin_uri;
   $checkout = '
 
-  <div class="modal fade in" id="checkout" tabindex="-1" role="dialog" aria-labelledby="checkout" aria-hidden="true" data-backdrop="static">
+  <div class="modal fade" id="checkout" tabindex="-1" role="dialog" aria-labelledby="checkout" aria-hidden="true">
     <div class="checkout-header">
       <a class="site-title white" href="#checkout" title="'. esc_attr( get_bloginfo( 'name', 'display' ) ) .'" rel="home">'.get_bloginfo( 'name' ).'</a>
       <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="fa fa-times"></i></button>
@@ -275,7 +275,7 @@ function render_checkout() {
           </div>
           <div class="input-group">
             <label>'. __('CVC', 'litton_bags') .'</label>
-            <input type="text" class="form-control card-cvc" size="4" autocomplete="off" data-stripe="cvc" placeholder="CVC" />
+            <input type="text" class="card-cvc" size="4" autocomplete="off" data-stripe="cvc" placeholder="CVC" />
             <label>'. __('Expiration (MM/YYYY)', 'litton_bags') .'</label>
             <input type="text" class="card-exp-month" size="2" data-stripe="exp-month" data-numeric placeholder="MM" />
             <span> / </span>
@@ -292,8 +292,8 @@ function render_checkout() {
         </form>
       </div><!-- modal-body -->
       <div class="checkout-footer">
-        <a href="#review" data-target="2" class="checkout-next mint">Next</a>
-        <!-- <a class="paypal-checkout" href="javascript:void(0);" title="Checkout via Paypal instead." data-payment-method="paypal"><img src="'.get_stylesheet_directory_uri().'/lib/ToMarket/media/paypal-checkout-icon.png" alt="Checkout via Paypal instead." /></a> -->
+        <a href="#review" data-target="3" class="checkout-next mint">Next</a>
+        <!-- <a class="paypal-checkout" href="javascript:void(0);" title="Checkout via Paypal instead." data-payment-method="paypal"><img src="'.$path_to_plugin_uri.'/media/paypal-checkout-icon.png" alt="Checkout via Paypal instead." /></a> -->
       </div>
     </div><!-- end step 2 -->
 
@@ -324,7 +324,7 @@ function render_checkout() {
 
         <!-- Successful Payment -->
         <div class="successful-payment">
-          <img src="'.$path_to_plugin.'/media/payment-success.jpg" />
+          <img src="'.$path_to_plugin_uri.'/media/payment-success.jpg" />
           <h4>You have successfully made a payment. An email with your shipping label and confirmation has been sent to you.</h4>
         </div>
 
@@ -404,8 +404,8 @@ function process_checkout() {
     $grandtotal = floor( $subtotal + ($subtotal * get_field( 'tax_rate', 'option' )) );
 
     // ### Verify Address via EasyPost
-    global $path_to_plugin;
-    require_once( __DIR__ . "/lib/EasyPost/lib/easypost.php");
+    global $path_to_plugin_uri;
+    require_once( dirname( __FILE__ ) . "/lib/EasyPost/lib/easypost.php");
     \EasyPost\EasyPost::setApiKey( set_easypost_api_key() );
     $shipping_address = \EasyPost\Address::create(array(
       'name' => $basicinfo['customer-name'],
@@ -426,7 +426,7 @@ function process_checkout() {
     // ### Stripe: Attempt to charge card
     // If their shipping adress is valid
     if ( isset($verified_address) && !empty($verified_address) ) {
-      require_once( __DIR__ . '/lib/Stripe/lib/Stripe.php'); // Load Stripe Client Library (PHP)
+      require_once( dirname( __FILE__ ) . '/lib/Stripe/lib/Stripe.php'); // Load Stripe Client Library (PHP)
       Stripe::setApiKey( stripe_api_key('secret') ); // # Present Secret API Key
       try {
         $charge = Stripe_Charge::create( array(
@@ -543,7 +543,7 @@ function process_stripe_payment() {
   // Verify the client request is legit upon Stripe payment form submission
   if ( isset( $_POST['form-type'] ) && $_POST['form-type'] === 'stripe-payment' && wp_verify_nonce( $_REQUEST['_wpnonce'], 'stripe-payment' ) ) {
     // Load Stripe Client Library (PHP)
-    require_once( __DIR__ . '/lib/Stripe/lib/Stripe.php');
+    require_once( dirname( __FILE__ ) . '/lib/Stripe/lib/Stripe.php');
     // # Present Secret API Key
     Stripe::setApiKey( stripe_api_key('secret') );
     // # Retrieve Payment Token from Submitted Form
@@ -581,8 +581,8 @@ add_action('init', 'process_stripe_payment');
 
 function easypost_create_label() {
 
-  global $path_to_plugin;
-  require_once( __DIR__ . "/lib/EasyPost/lib/easypost.php");
+  global $path_to_plugin_uri;
+  require_once( dirname( __FILE__ ) . "/lib/EasyPost/lib/easypost.php");
   \EasyPost\EasyPost::setApiKey( set_easypost_api_key() );
   // $to_address = \EasyPost\Address::create(
   //     array(

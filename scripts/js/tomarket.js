@@ -258,22 +258,22 @@ jQuery( document ).ready( function($) {
 	function insert_dev_inputs ( steps ) {
 		// Step "Basic"
 		function input_step_basic_dev_data() {
-			$('input[name="customer-name"]').val('Justin Hedani');
-			$('input[name="customer-email"]').val('jkhedani@gmail.com');
-			$('input[name="customer-phone"]').val('808-349-0746');
-			$('input[data-stripe="address-line1"], input[data-easypost="shipping-address-line1"]').val('3927 Koko Drive');
-			$('input[data-stripe="address-city"], input[data-easypost="shipping-address-city"]').val('Honolulu');
-			$('input[data-stripe="address-zip"], input[data-easypost="shipping-address-zip"]').val('96816');
-			$('input[data-stripe="address-state"], input[data-easypost="shipping-address-state"]').val('HI');
-			$('input[data-stripe="address-country"], input[data-easypost="shipping-address-country"]').val('USA');
+			// $('input[name="customer-name"]').val('Justin Hedani');
+			// $('input[name="customer-email"]').val('jkhedani@gmail.com');
+			// $('input[name="customer-phone"]').val('808-349-0746');
+			$('input[data-easypost="shipping-address-line1"]').val('3927 Koko Drive');
+			$('input[data-easypost="shipping-address-city"]').val('Honolulu');
+			$('input[data-easypost="shipping-address-zip"]').val('96816');
+			$('input[data-easypost="shipping-address-state"]').val('HI');
+			$('input[data-easypost="shipping-address-country"]').val('USA');
 		}
 		// Step "Payment"
 		function input_step_payment_dev_data() {
-			$('input[data-stripe="name"]').val('Justin Hedani');
-			$('input[data-stripe="number"]').val('4242424242424242');
+			// $('input[data-stripe="name"]').val('Justin Hedani');
+			// $('input[data-stripe="number"]').val('4242424242424242');
 			$('input[data-stripe="cvc"]').val('123');
-			$('input[data-stripe="exp-month"]').val('09');
-			$('input[data-stripe="exp-year"]').val('16');
+			// $('input[data-stripe="exp-month"]').val('09');
+			// $('input[data-stripe="exp-year"]').val('16');
 		}
 		// # Determine which steps to add input data to
 		if ( steps === "all" ) {
@@ -315,7 +315,6 @@ jQuery( document ).ready( function($) {
 	 * Checkout Event Listeners
    *
 	 */
-
 	// # Allow tabbed interface through checkout
 	$(document).on('click', '.checkout-tab', function() {
 		// Remove current class from all tabs
@@ -364,7 +363,7 @@ jQuery( document ).ready( function($) {
 	// CREATE Checkout
 	//	 It seems that the modal should probably be called last
 	//	 or at least before all the event listners
-	$('#checkout').modal({ backdrop : false, show : false, });
+	$('#checkout').modal({ backdrop: false, show : false, });
 
 	// QUERY VARIABLES
 	// # Display checkout via URL query
