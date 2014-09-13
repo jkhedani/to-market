@@ -93,25 +93,6 @@ if ( function_exists( 'acf_add_options_sub_page' ) && function_exists( 'get_fiel
 // # Utilities
 require_once( dirname( __FILE__ ) . '/lib/ToMarket/Util.php');
 
-// Generate Random Order Number
-function generateRandomOrderNumber( $length ) {
-  $chars = array_merge(range('A', 'Z'), range(0, 9));
-  shuffle($chars);
-  return implode(array_slice($chars, 0, $length));
-}
-
-// Money formatter
-// Accepts only cents
-function format_money( $amount, $currencyType ) {
-  // Format: US
-  if ( $currencyType == 'US' ) {
-    $nonos = array( '.', '$' ); // Set possible objects to strip
-    $priceInPennies = str_replace( $nonos, '', $amount); // ensure cents
-    $prettyMoney = money_format( '%n', $priceInPennies/100 ); // Format yo cash
-    return $prettyMoney;
-  }
-}
-
 // # PayPal
 // require_once( get_stylesheet_directory() . '/lib/PayPal/payments/method-paypal.php' );
 
