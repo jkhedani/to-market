@@ -1013,7 +1013,7 @@ html body #checkout .checkoutReview {
   font-size: 25px;
   margin: 2px 10px 0 0;
 }
-#shipping-address {
+#billing-address {
   display: none;
 }
 #review.checkout-step .product-subtotal {

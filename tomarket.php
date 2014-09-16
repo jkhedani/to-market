@@ -172,7 +172,93 @@ function render_checkout() {
           </div>
         </form>
 
+        <form action="" method="POST" id="shipping-address">
+          <legend>Shipping Address</legend>
+          <div class="input-group">
+            <label>'. __('Address Line 1', 'litton_bags') .'</label>
+            <input type="text" size="20" autocomplete="off" data-easypost="shipping-address-line1" name="shipping-address-line1" class="address" placeholder="Address Line 1" />
+          </div>
+          <div class="input-group">
+            <label>'. __('Address Line 2', 'litton_bags') .'</label>
+            <input type="text" size="20" autocomplete="off" data-easypost="shipping-address-line2" name="shipping-address-line2" class="address optional" placeholder="Address Line 2" />
+          </div>
+          <div class="input-row">
+            <div class="input-group city">
+              <label>'. __('City', 'litton_bags') .'</label>
+              <input type="text" size="20" autocomplete="off" data-easypost="shipping-address-city" name="shipping-address-city" placeholder="City" />
+            </div>
+            <div class="input-group state">
+              <label>'. __('State', 'litton_bags') .'</label>
+              <input type="text" size="20" autocomplete="off" class="state" data-easypost="shipping-address-state" name="shipping-address-state" placeholder="State" />
+            </div>
+            <div class="input-group zip">
+              <label>'. __('Zip Code', 'litton_bags') .'</label>
+              <input type="text" size="20" autocomplete="off" class="zip-code" data-easypost="shipping-address-zip" name="shipping-address-zip" placeholder="Zipcode" />
+            </div>
+            <div class="input-group country">
+              <label>'. __('Country', 'litton_bags') .'</label>
+              <input type="text" size="20" autocomplete="off" class="country" data-easypost="shipping-address-country" name="shipping-address-country" placeholder="USA" />
+            </div>
+          </div>
+
+          <p class="form-helper-text">Currently, we are only shipping to the United States on our website. Please <a href="mailto:support@littonbags.com">email us</a> for international purchases.</p>
+        </form>
+
+      </div><!-- .modal-body -->
+      <div class="checkout-footer">
+        <a href="#payment" data-target="2" class="checkout-next mint">Next »</a>
+      </div>
+      <!-- Message Overlay -->
+      <div class="overlay loading"><i class="spinner medium"></i><div class="overlay-message-container"><h4>Validating Address</h4></div></div>
+    </div><!-- end step 1 -->
+
+    <!-- Step Two: Payment Info -->
+    <div id="payment" class="checkout-step" data-step="2">
+      <div class="modal-header">
+        <h3 class="checkout-step-title">'. __('Payment Information','litton_bags') .'</h3>
+      </div>
+      <div class="modal-body">
+
+        <form action="" method="POST" id="stripe-payment-form">
+          <!-- <legend>Card Information</legend> -->
+          <ul class="cc-icons">
+            <li class="cc-icon visa"></li>
+            <li class="cc-icon mastercard"></li>
+            <li class="cc-icon amex"></li>
+            <li class="cc-icon discover"></li>
+            <li class="cc-icon jcb"></li>
+          </ul>
+          <div class="input-group">
+            <label>'. __('Name on Card', 'litton_bags') .'</label>
+            <div class="input-group-addon"><i class="fa fa-user"></i></div>
+            <input type="text" class="form-control" size="20" autocomplete="off" data-stripe="name" placeholder="Name on card" />
+          </div>
+          <div class="input-group">
+            <label>'. __('Card Number', 'litton_bags') .'</label>
+            <div class="input-group-addon"><i class="fa fa-credit-card"></i></div>
+            <input type="text" class="form-control card-number" size="20" autocomplete="off" data-stripe="number" placeholder="Card Number" />
+          </div>
+          <div class="input-group">
+            <label>'. __('CVC', 'litton_bags') .'</label>
+            <input type="text" class="card-cvc" size="4" autocomplete="off" data-stripe="cvc" placeholder="CVC" />
+            <label>'. __('Expiration (MM/YYYY)', 'litton_bags') .'</label>
+            <input type="text" class="card-exp-month" size="2" data-stripe="exp-month" data-numeric placeholder="MM" />
+            <span> / </span>
+            <input type="text" class="card-exp-year" size="4" data-stripe="exp-year" data-numeric placeholder="YYYY" />
+          </div>
+
+          <input type="hidden" name="redirect" value="'. get_permalink() .'"/>
+          <input type="hidden" name="form-type" value="stripe-payment" />
+          '.wp_nonce_field( "stripe-payment" ).'
+        </form>
+
+        <div class="input-group">
+          <input id="show-billing-address-fields" type="checkbox" />
+          <span class="formHelperText">My billing address is different from my shipping address.</span>
+        </div>
+
         <form action="" method="POST" id="billing-address">
+
           <legend>Billing Address</legend>
           <div class="input-group">
             <label>'. __('Address Line 1', 'litton_bags') .'</label>
@@ -202,95 +288,11 @@ function render_checkout() {
               <input type="text" size="7" autocomplete="off" class="country" data-stripe="address-country" data-shipping-target="shipping-address-country" class="address" placeholder="USA" />
             </div>
           </div>
-
-          <div class="input-group">
-            <input id="show-shipping-address-fields" type="checkbox" />
-            <span class="formHelperText">My shipping address is different from my billing address.</span>
-          </div>
-
-          <p class="form-helper-text">Currently, we are only shipping to the United States on our website. Please <a href="mailto:support@littonbags.com">email us</a> for international purchases.</p>
         </form>
 
-        <form action="" method="POST" id="shipping-address">
-          <legend>Shipping Address</legend>
-          <div class="input-group">
-            <label>'. __('Address Line 1', 'litton_bags') .'</label>
-            <input type="text" size="20" autocomplete="off" data-easypost="shipping-address-line1" name="shipping-address-line1" class="address" placeholder="Address Line 1" />
-          </div>
-          <div class="input-group">
-            <label>'. __('Address Line 2', 'litton_bags') .'</label>
-            <input type="text" size="20" autocomplete="off" data-easypost="shipping-address-line2" name="shipping-address-line2" class="address optional" placeholder="Address Line 2" />
-          </div>
-          <div class="input-row">
-            <div class="input-group city">
-              <label>'. __('City', 'litton_bags') .'</label>
-              <input type="text" size="20" autocomplete="off" data-easypost="shipping-address-city" name="shipping-address-city" placeholder="City" />
-            </div>
-            <div class="input-group state">
-              <label>'. __('State', 'litton_bags') .'</label>
-              <input type="text" size="20" autocomplete="off" class="state" data-easypost="shipping-address-state" name="shipping-address-state" placeholder="State" />
-            </div>
-            <div class="input-group zip">
-              <label>'. __('Zip Code', 'litton_bags') .'</label>
-              <input type="text" size="20" autocomplete="off" class="zip-code" data-easypost="shipping-address-zip" name="shipping-address-zip" placeholder="Zipcode" />
-            </div>
-            <div class="input-group country">
-              <label>'. __('Country', 'litton_bags') .'</label>
-              <input type="text" size="20" autocomplete="off" class="country" data-easypost="shipping-address-country" name="shipping-address-country" placeholder="USA" />
-            </div>
-          </div>
-        </form>
+        <hr />
+        <p class="form-helper-text"><i class="fa fa-cc-stripe"></i>We proudly use <a href="http://stripe.com">Stripe</a> to securely process your payment information.</p>
 
-      </div><!-- .modal-body -->
-      <div class="checkout-footer">
-        <a href="#payment" data-target="2" class="checkout-next mint">Next »</a>
-      </div>
-      <!-- Message Overlay -->
-      <div class="overlay loading"><i class="spinner medium"></i><div class="overlay-message-container"><h4>Validating Address</h4></div></div>
-    </div><!-- end step 1 -->
-
-    <!-- Step Two: Payment Info -->
-    <div id="payment" class="checkout-step" data-step="2">
-      <div class="modal-header">
-        <h3 class="checkout-step-title">'. __('Payment Information','litton_bags') .'</h3>
-      </div>
-      <div class="modal-body">
-        <form action="" method="POST" id="stripe-payment-form">
-          <!-- <legend>Card Information</legend> -->
-          <ul class="cc-icons">
-            <li class="cc-icon visa"></li>
-            <li class="cc-icon mastercard"></li>
-            <li class="cc-icon amex"></li>
-            <li class="cc-icon discover"></li>
-            <li class="cc-icon jcb"></li>
-          </ul>
-          <div class="input-group">
-            <label>'. __('Name on Card', 'litton_bags') .'</label>
-            <div class="input-group-addon"><i class="fa fa-user"></i></div>
-            <input type="text" class="form-control" size="20" autocomplete="off" data-stripe="name" placeholder="Name on card" />
-          </div>
-          <div class="input-group">
-            <label>'. __('Card Number', 'litton_bags') .'</label>
-            <div class="input-group-addon"><i class="fa fa-credit-card"></i></div>
-            <input type="text" class="form-control card-number" size="20" autocomplete="off" data-stripe="number" placeholder="Card Number" />
-          </div>
-          <div class="input-group">
-            <label>'. __('CVC', 'litton_bags') .'</label>
-            <input type="text" class="card-cvc" size="4" autocomplete="off" data-stripe="cvc" placeholder="CVC" />
-            <label>'. __('Expiration (MM/YYYY)', 'litton_bags') .'</label>
-            <input type="text" class="card-exp-month" size="2" data-stripe="exp-month" data-numeric placeholder="MM" />
-            <span> / </span>
-            <input type="text" class="card-exp-year" size="4" data-stripe="exp-year" data-numeric placeholder="YYYY" />
-          </div>
-
-          <hr />
-
-          <p class="form-helper-text"><i class="fa fa-cc-stripe"></i>We proudly use <a href="http://stripe.com">Stripe</a> to securely process your payment information.</p>
-
-          <input type="hidden" name="redirect" value="'. get_permalink() .'"/>
-          <input type="hidden" name="form-type" value="stripe-payment" />
-          '.wp_nonce_field( "stripe-payment" ).'
-        </form>
       </div><!-- modal-body -->
       <div class="checkout-footer">
         <a href="#review" data-target="3" class="checkout-next mint">Next</a>

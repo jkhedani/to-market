@@ -406,12 +406,12 @@ jQuery( document ).ready( function($) {
 /********************************* EasyPost ***********************************/
 /******************************************************************************/
 
-	// # Show Shipping address field
-	$(document).on( 'click', '#show-shipping-address-fields', function() {
-		if ( $("#show-shipping-address-fields").is(':checked') ) {
-			$('#shipping-address').show();
+	// # Show billing address field
+	$(document).on( 'click', '#show-billing-address-fields', function() {
+		if ( $("#show-billing-address-fields").is(':checked') ) {
+			$('#billing-address').show();
 		} else {
-			$('#shipping-address').hide();
+			$('#billing-address').hide();
 		}
 	});
 
