@@ -39,6 +39,7 @@ function tomarket_enqueue_scripts() {
     $stripe_publishable_api_key = get_field( 'stripe_test_publishable_api_key', 'option' ); // Use Test API Key for Stripe Processing
   }
   wp_enqueue_script( 'stripejs-script', $path_to_plugin_uri . '/assets/js/stripe/stripejs-v2.js', array(), false, true );
+  wp_enqueue_script( 'stripe-jquery-payment', $path_to_plugin_uri . '/assets/js/stripe/jquery.payment.js', array('jquery') ); // Validation script
 
   // To Market Scripts & Styles
   // Note: Currently all scripts share the same ajax nonce.

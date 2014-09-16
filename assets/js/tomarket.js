@@ -555,14 +555,14 @@ jQuery( document ).ready( function($) {
 	};
 
 	// # Stripe: Payments Formatting
+	// # https://github.com/stripe/jquery.payment
 	$('#checkout #payment input.card-number').payment('formatCardNumber');
-	$('#checkout #payment input.card-cvc').payment('formatCardExpiry');
+	$('#checkout #payment input.card-cvc').payment('formatCardCVC');
 
 	// # Stripe: Payments Client-side Validation
+	// # https://github.com/stripe/jquery.payment
 	$(document).on( 'blur', '#checkout input', function() {
-
 		var is_input_valid = false;
-
 		// If field is left blank...
 		if ( !$(this).val() ) {
 			$(this).prev().removeClass('ok');
@@ -571,7 +571,6 @@ jQuery( document ).ready( function($) {
 			$(this).prev().addClass('ok');
 			$(this).prev().removeClass('error');
 		}
-
 		// Validate email
 		// if ( $(this).hasClass('customer-email') ) {
 		//   if ( !isValidEmailAddress( $(this).val() ) ) {
@@ -581,7 +580,6 @@ jQuery( document ).ready( function($) {
 		//   }
 		// }
 		// set field state (ok or error)
-
 	});
 
 	// # Validate Info
