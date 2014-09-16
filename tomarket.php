@@ -23,27 +23,27 @@ function tomarket_enqueue_scripts() {
   if ( !empty($_SERVER['HTTPS']) ) $protocol = 'https:';
 
   // Bootstrap Scripts & Styles
-  wp_enqueue_style( 'bootstrap-styles', $path_to_plugin_uri . '/scripts/css/bootstrap/bootstrap.css' );
-  //wp_enqueue_style( 'bootstrap-forms-styles', $path_to_plugin_uri . '/scripts/css/bootstrap/forms.min.css' );
-  wp_enqueue_script( 'bootstrap-transition-script', $path_to_plugin_uri .'/scripts/js/bootstrap/transition.js', array(), false, true );
-  wp_enqueue_script( 'bootstrap-modal-script', $path_to_plugin_uri .'/scripts/js/bootstrap/modal.js', array(), false, true );
-  wp_enqueue_script( 'bootstrap-tooltip-script', $path_to_plugin_uri .'/scripts/js/bootstrap/tooltip.js', array(), false, true );
-  wp_enqueue_script( 'bootstrap-popover-script', $path_to_plugin_uri .'/scripts/js/bootstrap/popover.js', array(), false, true );
+  wp_enqueue_style( 'bootstrap-styles', $path_to_plugin_uri . '/assets/css/bootstrap/bootstrap.css' );
+  //wp_enqueue_style( 'bootstrap-forms-styles', $path_to_plugin_uri . '/assets/css/bootstrap/forms.min.css' );
+  wp_enqueue_script( 'bootstrap-transition-script', $path_to_plugin_uri .'/assets/js/bootstrap/transition.js', array(), false, true );
+  wp_enqueue_script( 'bootstrap-modal-script', $path_to_plugin_uri .'/assets/js/bootstrap/modal.js', array(), false, true );
+  wp_enqueue_script( 'bootstrap-tooltip-script', $path_to_plugin_uri .'/assets/js/bootstrap/tooltip.js', array(), false, true );
+  wp_enqueue_script( 'bootstrap-popover-script', $path_to_plugin_uri .'/assets/js/bootstrap/popover.js', array(), false, true );
 
   // HandBasket
-  wp_enqueue_script( 'simpleStorage-script', $path_to_plugin_uri . '/scripts/js/simpleStorage.js', array('jquery','json2') );
+  wp_enqueue_script( 'simpleStorage-script', $path_to_plugin_uri . '/assets/js/simpleStorage.js', array('jquery','json2') );
   // Stripe
   if ( get_field( 'stripe_api_mode', 'option' ) === true ) {
     $stripe_publishable_api_key = get_field( 'stripe_live_publishable_api_key', 'option' ); // Use Test API Key for Stripe Processing
   } else {
     $stripe_publishable_api_key = get_field( 'stripe_test_publishable_api_key', 'option' ); // Use Test API Key for Stripe Processing
   }
-  wp_enqueue_script( 'stripejs-script', $path_to_plugin_uri . '/scripts/js/stripe/stripejs-v2.js', array(), false, true );
+  wp_enqueue_script( 'stripejs-script', $path_to_plugin_uri . '/assets/js/stripe/stripejs-v2.js', array(), false, true );
 
   // To Market Scripts & Styles
   // Note: Currently all scripts share the same ajax nonce.
-  wp_enqueue_style( 'to-market-styles', $path_to_plugin_uri . '/scripts/css/tomarket.css' );
-  wp_enqueue_script( 'to-market-scripts', $path_to_plugin_uri . '/scripts/js/tomarket.js', array('jquery','json2') );
+  wp_enqueue_style( 'to-market-styles', $path_to_plugin_uri . '/assets/css/tomarket.css' );
+  wp_enqueue_script( 'to-market-scripts', $path_to_plugin_uri . '/assets/js/tomarket.js', array('jquery','json2') );
   wp_localize_script( 'to-market-scripts', 'to_market_scripts', array(
     'ajaxurl' => admin_url('admin-ajax.php',$protocol),
     'nonce' => wp_create_nonce('to_market_scripts_nonce'),
