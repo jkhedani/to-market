@@ -258,9 +258,16 @@ jQuery( document ).ready( function($) {
 	function insert_dev_inputs ( steps ) {
 		// Step "Basic"
 		function input_step_basic_dev_data() {
-			// $('input[name="customer-name"]').val('Justin Hedani');
-			// $('input[name="customer-email"]').val('jkhedani@gmail.com');
-			// $('input[name="customer-phone"]').val('808-349-0746');
+			$('input[name="customer-name"]').val('Justin Hedani');
+			$('input[name="customer-email"]').val('jkhedani@gmail.com');
+			$('input[name="customer-phone"]').val('808-349-0746');
+
+			$('input[data-stripe="address-line1"]').val('3927 Koko Drive');
+			$('input[data-stripe="address-city"]').val('Honolulu');
+			$('input[data-stripe="address-zip"]').val('96816');
+			$('input[data-stripe="address-state"]').val('HI');
+			$('input[data-stripe="address-country"]').val('USA');
+
 			$('input[data-easypost="shipping-address-line1"]').val('3927 Koko Drive');
 			$('input[data-easypost="shipping-address-city"]').val('Honolulu');
 			$('input[data-easypost="shipping-address-zip"]').val('96816');
@@ -269,11 +276,11 @@ jQuery( document ).ready( function($) {
 		}
 		// Step "Payment"
 		function input_step_payment_dev_data() {
-			// $('input[data-stripe="name"]').val('Justin Hedani');
-			// $('input[data-stripe="number"]').val('4242424242424242');
+			$('input[data-stripe="name"]').val('Justin Hedani');
+			$('input[data-stripe="number"]').val('4242424242424242');
 			$('input[data-stripe="cvc"]').val('123');
-			// $('input[data-stripe="exp-month"]').val('09');
-			// $('input[data-stripe="exp-year"]').val('16');
+			$('input[data-stripe="exp-month"]').val('09');
+			$('input[data-stripe="exp-year"]').val('16');
 		}
 		// # Determine which steps to add input data to
 		if ( steps === "all" ) {
