@@ -63,8 +63,6 @@ jQuery( document ).ready( function($) {
 				handbasket_items += handbasket_item;
 			}
 
-
-
 			// Generate totals & tax
 			var tax_rate_dollars = to_market_scripts.tax_rate * handbasket_subtotal;
 			var grand_total = tax_rate_dollars + handbasket_subtotal;
@@ -268,11 +266,11 @@ jQuery( document ).ready( function($) {
 			$('input[data-stripe="address-state"]').val('HI');
 			$('input[data-stripe="address-country"]').val('USA');
 
-			$('input[data-easypost="shipping-address-line1"]').val('3927 Koko Drive');
-			$('input[data-easypost="shipping-address-city"]').val('Honolulu');
-			$('input[data-easypost="shipping-address-zip"]').val('96816');
-			$('input[data-easypost="shipping-address-state"]').val('HI');
-			$('input[data-easypost="shipping-address-country"]').val('USA');
+			$('input[name="shipping-address-line1"]').val('3927 Koko Drive');
+			$('input[name="shipping-address-city"]').val('Honolulu');
+			$('input[name="shipping-address-zip"]').val('96816');
+			$('input[name="shipping-address-state"]').val('HI');
+			$('input[name="shipping-address-country"]').val('USA');
 		}
 		// Step "Payment"
 		function input_step_payment_dev_data() {
@@ -319,9 +317,48 @@ jQuery( document ).ready( function($) {
 	}
 
 	/**
-	 * Checkout Event Listeners
-   *
+	 * Simple delay function.
+	 * @function
+	 * @param {function} callback - Function to be called back.
+	 * @param {int} ms - The amount of time before callback occurs.
 	 */
+	var delay = (function(){
+	  var timer = 0;
+	  return function(callback, ms){
+	    clearTimeout (timer);
+	    timer = setTimeout(callback, ms);
+	  };
+	})();
+
+	//
+	// Checkout Event Listeners
+	//
+
+	/**
+	 * Copy shipping address values to billing address values
+	 * @event
+	 */
+	$(document).on('keyup','form#shipping-address input', function(){
+		var input_target = $(this).data('target');
+		var input_data = $(this).val();
+		delay( function() {
+			$(document).find('form#billing-address input[data-stripe="'+input_target+'"]').val( input_data );
+		}, 4000);
+	});
+
+	/**
+	 * Show billing address field
+	 * @event
+	 */
+	$(document).on( 'click', '#show-billing-address-fields', function() {
+		if ( $("#show-billing-address-fields").is(':checked') ) {
+			$('#billing-address').show();
+			$(document).find('form#billing-address input').val('');
+		} else {
+			$('#billing-address').hide();
+		}
+	});
+
 	// # Allow tabbed interface through checkout
 	$(document).on('click', '.checkout-tab', function() {
 		// Remove current class from all tabs
@@ -405,15 +442,6 @@ jQuery( document ).ready( function($) {
 /******************************************************************************/
 /********************************* EasyPost ***********************************/
 /******************************************************************************/
-
-	// # Show billing address field
-	$(document).on( 'click', '#show-billing-address-fields', function() {
-		if ( $("#show-billing-address-fields").is(':checked') ) {
-			$('#billing-address').show();
-		} else {
-			$('#billing-address').hide();
-		}
-	});
 
 	// # Populate shipping address field (possibly on keyup)
 	// $(document).on( 'keyup', 'input.address', function() {

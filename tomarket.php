@@ -176,28 +176,28 @@ function render_checkout() {
           <legend>Shipping Address</legend>
           <div class="input-group">
             <label>'. __('Address Line 1', 'litton_bags') .'</label>
-            <input type="text" size="20" autocomplete="off" data-easypost="shipping-address-line1" name="shipping-address-line1" class="address" placeholder="Address Line 1" />
+            <input type="text" size="20" autocomplete="off" data-target="address-line1" name="shipping-address-line1" class="address" placeholder="Address Line 1" />
           </div>
           <div class="input-group">
             <label>'. __('Address Line 2', 'litton_bags') .'</label>
-            <input type="text" size="20" autocomplete="off" data-easypost="shipping-address-line2" name="shipping-address-line2" class="address optional" placeholder="Address Line 2" />
+            <input type="text" size="20" autocomplete="off" data-target="address-line2" name="shipping-address-line2" class="address optional" placeholder="Address Line 2" />
           </div>
           <div class="input-row">
             <div class="input-group city">
               <label>'. __('City', 'litton_bags') .'</label>
-              <input type="text" size="20" autocomplete="off" data-easypost="shipping-address-city" name="shipping-address-city" placeholder="City" />
+              <input type="text" size="20" autocomplete="off" data-target="address-city" name="shipping-address-city" placeholder="City" />
             </div>
             <div class="input-group state">
               <label>'. __('State', 'litton_bags') .'</label>
-              <input type="text" size="20" autocomplete="off" class="state" data-easypost="shipping-address-state" name="shipping-address-state" placeholder="State" />
+              <input type="text" size="20" autocomplete="off" class="state" data-target="address-state" name="shipping-address-state" placeholder="State" />
             </div>
             <div class="input-group zip">
               <label>'. __('Zip Code', 'litton_bags') .'</label>
-              <input type="text" size="20" autocomplete="off" class="zip-code" data-easypost="shipping-address-zip" name="shipping-address-zip" placeholder="Zipcode" />
+              <input type="text" size="20" autocomplete="off" class="zip-code" data-target="address-zip" name="shipping-address-zip" placeholder="Zipcode" />
             </div>
             <div class="input-group country">
               <label>'. __('Country', 'litton_bags') .'</label>
-              <input type="text" size="20" autocomplete="off" class="country" data-easypost="shipping-address-country" name="shipping-address-country" placeholder="USA" />
+              <input type="text" size="20" autocomplete="off" class="country" data-target="address-country" name="shipping-address-country" placeholder="USA" />
             </div>
           </div>
 
@@ -239,12 +239,11 @@ function render_checkout() {
             <input type="text" class="form-control card-number" size="20" autocomplete="off" data-stripe="number" placeholder="Card Number" />
           </div>
           <div class="input-group">
-            <label>'. __('CVC', 'litton_bags') .'</label>
-            <input type="text" class="card-cvc" size="4" autocomplete="off" data-stripe="cvc" placeholder="CVC" />
             <label>'. __('Expiration (MM/YYYY)', 'litton_bags') .'</label>
             <input type="text" class="card-exp-month" size="2" data-stripe="exp-month" data-numeric placeholder="MM" />
-            <span> / </span>
             <input type="text" class="card-exp-year" size="4" data-stripe="exp-year" data-numeric placeholder="YYYY" />
+            <label>'. __('CVC', 'litton_bags') .'</label>
+            <input type="text" class="card-cvc" size="4" autocomplete="off" data-stripe="cvc" placeholder="CVC" />
           </div>
 
           <input type="hidden" name="redirect" value="'. get_permalink() .'"/>
@@ -263,29 +262,29 @@ function render_checkout() {
           <div class="input-group">
             <label>'. __('Address Line 1', 'litton_bags') .'</label>
             <div class="input-group-addon"><i class="fa fa-envelope"></i></div>
-            <input type="text" class="form-control" size="20" autocomplete="off" data-stripe="address-line1" data-shipping-target="shipping-address-line1" class="address" placeholder="Address Line 1" />
+            <input type="text" class="form-control" size="20" autocomplete="off" data-stripe="address-line1" class="address" placeholder="Address Line 1" />
           </div>
           <div class="input-group">
             <label>'. __('Address Line 2', 'litton_bags') .'</label>
-            <input type="text" class="form-control" size="20" autocomplete="off" data-stripe="address-line2" data-shipping-target="shipping-address-line2" class="address" placeholder="Address Line 2" />
+            <input type="text" class="form-control" size="20" autocomplete="off" data-stripe="address-line2" class="address" placeholder="Address Line 2" />
           </div>
           <div class="input-row">
             <div class="input-group city">
               <label>'. __('City', 'litton_bags') .'</label>
               <div class="input-group-addon"><i class="fa fa-building"></i></div>
-              <input type="text" class="form-control" size="20" autocomplete="off" data-stripe="address-city" data-shipping-target="shipping-address-city" class="address" placeholder="City" />
+              <input type="text" class="form-control" size="20" autocomplete="off" data-stripe="address-city" class="address" placeholder="City" />
             </div>
             <div class="input-group zip">
               <label>'. __('Zip Code', 'litton_bags') .'</label>
-              <input type="text" size="20" autocomplete="off" class="zip-code" data-stripe="address-zip" data-shipping-target="shipping-address-zip" class="address" placeholder="Zipcode" />
+              <input type="text" size="20" autocomplete="off" class="zip-code" data-stripe="address-zip" class="address" placeholder="Zipcode" />
             </div>
             <div class="input-group state">
               <label>'. __('State', 'litton_bags') .'</label>
-              <input type="text" size="5" autocomplete="off" class="state" data-stripe="address-state" data-shipping-target="shipping-address-state" class="address" placeholder="State" />
+              <input type="text" size="5" autocomplete="off" class="state" data-stripe="address-state" class="address" placeholder="State" />
             </div>
             <div class="input-group country">
               <label>'. __('Country', 'litton_bags') .'</label>
-              <input type="text" size="7" autocomplete="off" class="country" data-stripe="address-country" data-shipping-target="shipping-address-country" class="address" placeholder="USA" />
+              <input type="text" size="7" autocomplete="off" class="country" data-stripe="address-country" class="address" placeholder="USA" />
             </div>
           </div>
         </form>
