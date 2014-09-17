@@ -277,8 +277,7 @@ jQuery( document ).ready( function($) {
 			$('input[data-stripe="name"]').val('Justin Hedani');
 			$('input[data-stripe="number"]').val('4242424242424242');
 			$('input[data-stripe="cvc"]').val('123');
-			$('input[data-stripe="exp-month"]').val('09');
-			$('input[data-stripe="exp-year"]').val('16');
+			$('input[data-stripe="expiry"]').val('09 / 2015');
 		}
 		// # Determine which steps to add input data to
 		if ( steps === "all" ) {
@@ -388,7 +387,6 @@ jQuery( document ).ready( function($) {
 		$(document).find('#review.checkout-step .modal-body').prepend( handbasket_items );
 	});
 
-
 	// SHOWN
 	$(document).on( 'shown.bs.modal', '#checkout', function() {
 		// # Prevent page scrolling when modal is present
@@ -407,7 +405,7 @@ jQuery( document ).ready( function($) {
 	// CREATE Checkout
 	//	 It seems that the modal should probably be called last
 	//	 or at least before all the event listners
-	$('#checkout').modal({ backdrop: false, show : false, });
+	$('#checkout').modal({ show : false, });
 
 	// QUERY VARIABLES
 	// # Display checkout via URL query
@@ -487,6 +485,7 @@ jQuery( document ).ready( function($) {
 
 	/**
 	 * Process checkout
+	 * @event
 	 * Submit shipping infor, create stripe token,
 	 */
  	$(document).on('click', '[data-action="checkout"]', function() {
@@ -502,10 +501,6 @@ jQuery( document ).ready( function($) {
 		// If shipping address is filled out, serialize data for processing.
 		// Convert serialized data to a json object for parsing later
 		var shipping_address = convert_form_to_json( $('form#shipping-address') );
-		// var shipping_address_object = {};
-		// for ( i = 0; i < shipping_address.length; i++ ) {
-		// 	shipping_address_object[ shipping_address[i]['name'] ] = shipping_address[i]['value'];
-		// }
 
 		// ### Basket Info
 		var basket_contents = {};
@@ -516,10 +511,10 @@ jQuery( document ).ready( function($) {
 		// ### Stripe Construct payment token
 		Stripe.setPublishableKey(to_market_scripts.stripe_publishable_key); // # Present Publishable API Key
 		Stripe.card.createToken({
-			number: $('#checkout #payment input.card-number').val(),
-			cvc: $('#checkout #payment input.card-cvc').val(),
-			exp_month: $('#checkout #payment input.card-exp-month').val(),
-			exp_year: $('#checkout #payment input.card-exp-year').val()
+			number: $('#checkout #payment input[data-stripe="number"]').val(),
+			cvc: $('#checkout #payment input[data-stripe="cvc"]').val(),
+			exp_month: $('#checkout #payment input[data-stripe="expiry"]').payment('cardExpiryVal')['month'],
+			exp_year: $('#checkout #payment input[data-stripe="expiry"]').payment('cardExpiryVal')['year']
 		}, stripeResponseHandler);
 		function stripeResponseHandler(status, response) {
 			var $form = $('#stripe-payment-form');
@@ -570,10 +565,6 @@ jQuery( document ).ready( function($) {
 	});
 
 
-/******************************************************************************/
-/************************* Client-side validation *****************************/
-/******************************************************************************/
-
 	/**
 	* jQuery Regex Email Validation
 	*/
@@ -586,19 +577,58 @@ jQuery( document ).ready( function($) {
 	// # https://github.com/stripe/jquery.payment
 	$('#checkout #payment input.card-number').payment('formatCardNumber');
 	$('#checkout #payment input.card-cvc').payment('formatCardCVC');
+	$('#checkout #payment input.card-expiry').payment('formatCardExpiry');
 
-	// # Stripe: Payments Client-side Validation
-	// # https://github.com/stripe/jquery.payment
+	/**
+	 * Stripe: Payments Client-side Validation
+	 * @link: https://github.com/stripe/jquery.payment
+	 */
 	$(document).on( 'blur', '#checkout input', function() {
-		var is_input_valid = false;
-		// If field is left blank...
-		if ( !$(this).val() ) {
-			$(this).prev().removeClass('ok');
-			$(this).prev().addClass('error');
-		} else {
-			$(this).prev().addClass('ok');
-			$(this).prev().removeClass('error');
+
+		var input = $(this);
+
+		// @function Indicated to user that field has an error.
+		$.fn.has_error = function( err_msg ) {
+			var error_message = err_msg;
+			this.prev().removeClass('ok');
+			this.prev().addClass('error'); // Mark field as error.
 		}
+
+		// @function Indicated to user that field has no errors.
+		$.fn.is_ok = function() {
+			this.prev().removeClass('error');
+			this.prev().addClass('ok');
+		}
+
+		// @event Check if the field is blank.
+		if ( input.val() === "" ) {
+			input.has_error( "This field is blank." );
+			return false;
+		}
+
+		// @event Validate Card Number.
+		if ( input.data('stripe') === 'number' ) {
+			if ( ! $.payment.validateCardNumber( input.val() ) ) {
+				input.has_error( "The card number is not a valid card number." );
+				return false;
+			}
+		}
+		// @event Validate Card Expiry.
+		if ( input.data('stripe') === 'expiry' ) {
+			if ( ! $.payment.validateCardExpiry( input.val() ) ) {
+				input.has_error( "The card expiry is not valid." );
+				return false;
+			}
+		}
+		// @event Validate CVC.
+		if ( input.data('stripe') === 'cvc' ) {
+			if ( ! $.payment.validateCardCVC( input.val() ) ) {
+				input.has_error( "The card expiry is not valid." );
+				return false;
+			}
+		}
+
+
 		// Validate email
 		// if ( $(this).hasClass('customer-email') ) {
 		//   if ( !isValidEmailAddress( $(this).val() ) ) {
@@ -608,6 +638,10 @@ jQuery( document ).ready( function($) {
 		//   }
 		// }
 		// set field state (ok or error)
+
+		// If field validates, mark as ok
+		$(this).is_ok();
+
 	});
 
 	// # Validate Info

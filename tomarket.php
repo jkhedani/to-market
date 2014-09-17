@@ -109,9 +109,10 @@ function render_checkout() {
   $checkout = '
 
   <div class="modal fade" id="checkout" tabindex="-1" role="dialog" aria-labelledby="checkout" aria-hidden="true">
+    <div class="modal-dialog checkout-dialog">
     <div class="checkout-header">
       <a class="site-title white" href="#checkout" title="'. esc_attr( get_bloginfo( 'name', 'display' ) ) .'" rel="home">'.get_bloginfo( 'name' ).'</a>
-      <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="fa fa-times"></i></button>
+      <!--<button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="fa fa-times"></i></button>-->
 
       <ul class="checkout-tabs">
         <li>
@@ -240,12 +241,14 @@ function render_checkout() {
           </div>
           <div class="input-group">
             <label>'. __('Expiration (MM/YYYY)', 'litton_bags') .'</label>
-            <input type="text" class="card-exp-month" size="2" data-stripe="exp-month" data-numeric placeholder="MM" />
-            <input type="text" class="card-exp-year" size="4" data-stripe="exp-year" data-numeric placeholder="YYYY" />
+            <div class="input-group-addon"><i class="fa fa-calendar"></i></div>
+            <input type="text" class="card-expiry" size="2" data-stripe="expiry" placeholder="MM / YYYY" />
+          </div>
+          <div class="input-group">
             <label>'. __('CVC', 'litton_bags') .'</label>
+            <div class="input-group-addon"><i class="fa fa-lock"></i></div>
             <input type="text" class="card-cvc" size="4" autocomplete="off" data-stripe="cvc" placeholder="CVC" />
           </div>
-
           <input type="hidden" name="redirect" value="'. get_permalink() .'"/>
           <input type="hidden" name="form-type" value="stripe-payment" />
           '.wp_nonce_field( "stripe-payment" ).'
@@ -257,7 +260,6 @@ function render_checkout() {
         </div>
 
         <form action="" method="POST" id="billing-address">
-
           <legend>Billing Address</legend>
           <div class="input-group">
             <label>'. __('Address Line 1', 'litton_bags') .'</label>
@@ -312,7 +314,7 @@ function render_checkout() {
         <a class="watermelon" href="#" data-action="checkout">Checkout</a>
       </div>
       <div class="overlay loading"><i class="spinner medium"></i><div class="overlay-message-container"><h4>Processing checkout</h4></div></div>
-    </div>
+    </div><!-- end step 3 -->
 
     <!-- Step Four: Message Screen -->
     <div id="message" class="checkout-step" data-step="4">
@@ -334,7 +336,9 @@ function render_checkout() {
       <div class="checkout-footer">
       </div>
       <div class="overlay loading"><i class="spinner medium"></i><div class="overlay-message-container"><h4>Processing Payment</h4></div></div>
-    </div>
+    </div><!-- end ste 4
+
+    </div><!-- .modal-dialog -->
 
   </div>
 

@@ -724,6 +724,9 @@ html body #checkout .checkoutReview {
     transform: translateX(0);
   }
 }
+.modal-backdrop {
+  background: rgba(237, 238, 237, 0.9) !important;
+}
 #checkout {
   top: 0;
   left: 0;
@@ -731,7 +734,7 @@ html body #checkout .checkoutReview {
   width: 100%;
   height: 100%;
   padding: 20px 20px 0;
-  background: rgba(237, 238, 237, 0.9) !important;
+  background: rgba(237, 238, 237, 0) !important;
   color: #737a7d;
   font-weight: normal;
 }

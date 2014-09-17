@@ -213,6 +213,7 @@ html body {
   @-ms-keyframes panelShakeAnimation{0{-webkit-transform:translateX(0);-moz-transform:translateX(0);-ms-transform:translateX(0);-o-transform:translateX(0);transform:translateX(0)}12.5%{-webkit-transform:translateX(-6px) rotateY(-5deg);-moz-transform:translateX(-6px) rotateY(-5deg);-ms-transform:translateX(-6px) rotateY(-5deg);-o-transform:translateX(-6px) rotateY(-5deg);transform:translateX(-6px) rotateY(-5deg)}37.5%{-webkit-transform:translateX(5px) rotateY(4deg);-moz-transform:translateX(5px) rotateY(4deg);-ms-transform:translateX(5px) rotateY(4deg);-o-transform:translateX(5px) rotateY(4deg);transform:translateX(5px) rotateY(4deg)}62.5%{-webkit-transform:translateX(-3px) rotateY(-2deg);-moz-transform:translateX(-3px) rotateY(-2deg);-ms-transform:translateX(-3px) rotateY(-2deg);-o-transform:translateX(-3px) rotateY(-2deg);transform:translateX(-3px) rotateY(-2deg)}87.5%{-webkit-transform:translateX(2px) rotateY(1deg);-moz-transform:translateX(2px) rotateY(1deg);-ms-transform:translateX(2px) rotateY(1deg);-o-transform:translateX(2px) rotateY(1deg);transform:translateX(2px) rotateY(1deg)}100%{-webkit-transform:translateX(0);-moz-transform:translateX(0);-ms-transform:translateX(0);-o-transform:translateX(0);transform:translateX(0)}}
   @keyframes panelShakeAnimation{0{-webkit-transform:translateX(0);-moz-transform:translateX(0);-ms-transform:translateX(0);-o-transform:translateX(0);transform:translateX(0)}12.5%{-webkit-transform:translateX(-6px) rotateY(-5deg);-moz-transform:translateX(-6px) rotateY(-5deg);-ms-transform:translateX(-6px) rotateY(-5deg);-o-transform:translateX(-6px) rotateY(-5deg);transform:translateX(-6px) rotateY(-5deg)}37.5%{-webkit-transform:translateX(5px) rotateY(4deg);-moz-transform:translateX(5px) rotateY(4deg);-ms-transform:translateX(5px) rotateY(4deg);-o-transform:translateX(5px) rotateY(4deg);transform:translateX(5px) rotateY(4deg)}62.5%{-webkit-transform:translateX(-3px) rotateY(-2deg);-moz-transform:translateX(-3px) rotateY(-2deg);-ms-transform:translateX(-3px) rotateY(-2deg);-o-transform:translateX(-3px) rotateY(-2deg);transform:translateX(-3px) rotateY(-2deg)}87.5%{-webkit-transform:translateX(2px) rotateY(1deg);-moz-transform:translateX(2px) rotateY(1deg);-ms-transform:translateX(2px) rotateY(1deg);-o-transform:translateX(2px) rotateY(1deg);transform:translateX(2px) rotateY(1deg)}100%{-webkit-transform:translateX(0);-moz-transform:translateX(0);-ms-transform:translateX(0);-o-transform:translateX(0);transform:translateX(0)}}
 }
+.modal-backdrop { background: fade(@lightGray,90%) !important; }
 #checkout {
   top: 0;
   left: 0;
@@ -220,7 +221,7 @@ html body {
   width: 100%;
   height: 100%;
   padding: 20px 20px 0;
-  background: fade(@lightGray,90%) !important;
+  background: fade(@lightGray,0%) !important;
 
   color: @darkGray;
   font-weight: normal;
