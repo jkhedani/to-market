@@ -155,7 +155,7 @@ function render_checkout() {
       <div class="modal-body">
 
         <form action="" method="POST" id="basic-info" >
-          <!-- <legend>Basic Information</legend> -->
+          <legend>Basic Information</legend>
           <div class="input-group">
             <label>'. __('Full Name', 'litton_bags') .'</label>
             <div class="input-group-addon"><i class="fa fa-user"></i></div>
@@ -207,7 +207,7 @@ function render_checkout() {
 
       </div><!-- .modal-body -->
       <div class="checkout-footer">
-        <a href="#payment" data-target="2" class="checkout-next mint">Next »</a>
+        <a href="#payment" data-target="2" class="select-checkout-tab mint">Next »</a>
       </div>
       <!-- Message Overlay -->
       <div class="overlay loading"><i class="spinner medium"></i><div class="overlay-message-container"><h4>Validating Address</h4></div></div>
@@ -221,14 +221,35 @@ function render_checkout() {
       <div class="modal-body">
 
         <form action="" method="POST" id="stripe-payment-form">
-          <!-- <legend>Card Information</legend> -->
-          <ul class="cc-icons">
-            <li class="cc-icon visa"></li>
-            <li class="cc-icon mastercard"></li>
-            <li class="cc-icon amex"></li>
-            <li class="cc-icon discover"></li>
-            <li class="cc-icon jcb"></li>
-          </ul>
+          <!-- legend>Card Information</legend> -->
+          <div class="payment-method-container">
+            <p class="form-helper-text">We accept the following methods of payment:</p>
+            <ul class="cc-icons">
+              <li class="cc-icon visa">
+                <img class="color active" src="'.$path_to_plugin_uri.'/assets/media/cc/visa_32.png" />
+                <img class="bw" src="'.$path_to_plugin_uri.'/assets/media/cc/visa_32-bw.png" />
+              </li>
+              <li class="cc-icon mastercard">
+                <img class="color active" src="'.$path_to_plugin_uri.'/assets/media/cc/mastercard_32.png" />
+                <img class="bw" src="'.$path_to_plugin_uri.'/assets/media/cc/mastercard_32-bw.png" />
+              </li>
+              <li class="cc-icon amex">
+                <img class="color active" src="'.$path_to_plugin_uri.'/assets/media/cc/american_express_32.png" />
+                <img class="bw" src="'.$path_to_plugin_uri.'/assets/media/cc/american_express_32-bw.png" />
+              </li>
+              <li class="cc-icon discover">
+                <img class="color active" src="'.$path_to_plugin_uri.'/assets/media/cc/discover_32.png" />
+                <img class="bw" src="'.$path_to_plugin_uri.'/assets/media/cc/discover_32-bw.png" />
+              </li>
+              <li class="cc-icon jcb">
+                <img class="color active" src="'.$path_to_plugin_uri.'/assets/media/cc/jcb_32.png" />
+                <img class="bw" src="'.$path_to_plugin_uri.'/assets/media/cc/jcb_32-bw.png" />
+              </li>
+            </ul>
+            <div class="or">- or -</div>
+            <a class="paypal-checkout" href="javascript:void(0);" title="Checkout via Paypal instead." data-payment-method="paypal"><img src="'.$path_to_plugin_uri.'/assets/media/paypal-checkout-icon.png" alt="Checkout via Paypal instead." /></a>
+          </div>
+
           <div class="input-group">
             <label>'. __('Name on Card', 'litton_bags') .'</label>
             <div class="input-group-addon"><i class="fa fa-user"></i></div>
@@ -239,15 +260,17 @@ function render_checkout() {
             <div class="input-group-addon"><i class="fa fa-credit-card"></i></div>
             <input type="text" class="form-control card-number" size="20" autocomplete="off" data-stripe="number" placeholder="Card Number" />
           </div>
-          <div class="input-group">
-            <label>'. __('Expiration (MM/YYYY)', 'litton_bags') .'</label>
-            <div class="input-group-addon"><i class="fa fa-calendar"></i></div>
-            <input type="text" class="card-expiry" size="2" data-stripe="expiry" placeholder="MM / YYYY" />
-          </div>
-          <div class="input-group">
-            <label>'. __('CVC', 'litton_bags') .'</label>
-            <div class="input-group-addon"><i class="fa fa-lock"></i></div>
-            <input type="text" class="card-cvc" size="4" autocomplete="off" data-stripe="cvc" placeholder="CVC" />
+          <div class="input-row">
+            <div class="input-group expiry">
+              <label>'. __('Expiration (MM/YYYY)', 'litton_bags') .'</label>
+              <div class="input-group-addon"><i class="fa fa-calendar"></i></div>
+              <input type="text" class="card-expiry" size="2" data-stripe="expiry" placeholder="MM / YYYY" />
+            </div>
+            <div class="input-group cvc">
+              <label>'. __('CVC', 'litton_bags') .'</label>
+              <div class="input-group-addon"><i class="fa fa-lock"></i></div>
+              <input type="text" class="card-cvc" size="4" autocomplete="off" data-stripe="cvc" placeholder="CVC" />
+            </div>
           </div>
           <input type="hidden" name="redirect" value="'. get_permalink() .'"/>
           <input type="hidden" name="form-type" value="stripe-payment" />
@@ -256,7 +279,7 @@ function render_checkout() {
 
         <div class="input-group">
           <input id="show-billing-address-fields" type="checkbox" />
-          <span class="formHelperText">My billing address is different from my shipping address.</span>
+          <p class="form-helper-text">My billing address is different from my shipping address.</p>
         </div>
 
         <form action="" method="POST" id="billing-address">
@@ -296,10 +319,10 @@ function render_checkout() {
 
       </div><!-- modal-body -->
       <div class="checkout-footer">
-        <a href="#review" data-target="3" class="checkout-next mint">Next</a>
-        <!-- <a class="paypal-checkout" href="javascript:void(0);" title="Checkout via Paypal instead." data-payment-method="paypal"><img src="'.$path_to_plugin_uri.'/media/paypal-checkout-icon.png" alt="Checkout via Paypal instead." /></a> -->
+        <a href="#review" data-target="3" class="select-checkout-tab mint">Next &raquo;</a>
       </div>
     </div><!-- end step 2 -->
+
 
     <!-- Step Three: Review -->
     <div id="review" class="checkout-step" data-step="3">
@@ -307,14 +330,21 @@ function render_checkout() {
         <h3 class="checkout-step-title">'. __('Review','litton_bags') .'</h3>
       </div>
       <div class="modal-body">
-        <!-- <div class="basic-overview">basic</div> -->
-        <!-- <div class="payment-overview">overview</div> -->
+        <div class="review-shipping-address">
+          Shipping Address
+          <a href="#basic" data-target="1" class="select-checkout-tab">Edit</a>
+        </div>
+        <hr />
+        <div class="review-payment-method">Brief of payment method</div>
+        <hr />
+        <div class="review-cart">List of basket items</div>
       </div>
       <div class="checkout-footer">
-        <a class="watermelon" href="#" data-action="checkout">Checkout</a>
+        <a class="mint" href="#" data-action="checkout">Checkout</a>
       </div>
       <div class="overlay loading"><i class="spinner medium"></i><div class="overlay-message-container"><h4>Processing checkout</h4></div></div>
     </div><!-- end step 3 -->
+
 
     <!-- Step Four: Message Screen -->
     <div id="message" class="checkout-step" data-step="4">
@@ -328,7 +358,7 @@ function render_checkout() {
 
         <!-- Successful Payment -->
         <div class="successful-payment">
-          <img src="'.$path_to_plugin_uri.'/media/payment-success.jpg" />
+          <img src="'.$path_to_plugin_uri.'/assets/media/payment-success.jpg" />
           <h4>You have successfully made a payment. An email with your shipping label and confirmation has been sent to you.</h4>
         </div>
 

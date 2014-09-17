@@ -744,6 +744,9 @@ html body #checkout .checkoutReview {
   line-height: 1.2;
   font-size: 16px;
 }
+#checkout form {
+  margin-bottom: 8px;
+}
 #checkout .form-helper-text {
   margin: 10px 0;
   font-size: 12px;
@@ -777,7 +780,6 @@ html body #checkout .checkoutReview {
 }
 #checkout .input-group {
   position: relative;
-  margin-bottom: 10px;
 }
 #checkout .input-group label {
   display: none;
@@ -811,20 +813,8 @@ html body #checkout .checkoutReview {
 #checkout .input-group input {
   color: #737a7d;
   padding: 18px 15px;
-  margin: 0;
+  margin: 0 0 10px 0;
   width: 100%;
-}
-#checkout .input-group input[data-stripe="cvc"] {
-  width: 30%;
-  text-align: center;
-}
-#checkout .input-group input[data-stripe="exp-month"] {
-  width: 20%;
-  text-align: center;
-}
-#checkout .input-group input[data-stripe="exp-year"] {
-  width: 20%;
-  text-align: center;
 }
 #checkout .input-group input[type='checkbox'] {
   width: auto;
@@ -851,42 +841,10 @@ html body #checkout .checkoutReview {
 #checkout .alert-message.error {
   background-color: rgba(255, 99, 104, 0.6);
 }
-#checkout ul.cc-icons {
-  margin: 0 0 20px 0;
-}
-#checkout ul.cc-icons:before,
-#checkout ul.cc-icons:after {
-  content: " ";
-  display: table;
-}
-#checkout ul.cc-icons:after {
-  clear: both;
-}
-#checkout ul.cc-icons li.cc-icon {
-  width: 32px;
-  height: 32px;
-  float: left;
-  list-style: none;
-}
-#checkout ul.cc-icons li.cc-icon.visa {
-  background: url('../../media/cc/visa_32-bw.png');
-}
-#checkout ul.cc-icons li.cc-icon.mastercard {
-  background: url('../../media/cc/mastercard_32-bw.png');
-}
-#checkout ul.cc-icons li.cc-icon.amex {
-  background: url('../../media/cc/american_express_32-bw.png');
-}
-#checkout ul.cc-icons li.cc-icon.discover {
-  background: url('../../media/cc/discover_32-bw.png');
-}
-#checkout ul.cc-icons li.cc-icon.jcb {
-  background: url('../../media/cc/jcb_32-bw.png');
-}
 #checkout .checkout-header {
   position: relative;
   padding: 38px 0 0;
-  background: url('../../media/checkout-header-bg.jpg');
+  background: url('../../assets/media/checkout-header-bg.jpg');
   background-size: cover;
   -webkit-border-radius: 8px 8px 0 0;
   -moz-border-radius: 8px 8px 0 0;
@@ -1001,6 +959,29 @@ html body #checkout .checkoutReview {
 #checkout .checkout-step .checkout-footer a.watermelon {
   background: #ff6368;
 }
+#checkout .checkout-step#review.checkout-step .modal-body .product-subtotal {
+  display: none !important;
+}
+#checkout .checkout-step#review.checkout-step .modal-body a.remove-handbasket-item {
+  width: 30px !important;
+  margin: -2px 0 0 0 !important;
+}
+#checkout .checkout-step#review.checkout-step .modal-body .review-cart .hand-basket-product .product-preview {
+  width: 38px;
+}
+#checkout .checkout-step#review.checkout-step .modal-body .review-cart .hand-basket-product .product-qty {
+  float: left;
+}
+#checkout .checkout-step#review.checkout-step .modal-body .review-cart .hand-basket-product .product-price {
+  display: none;
+}
+#checkout .checkout-step#review.checkout-step .modal-body .review-cart .hand-basket-product .remove-handbasket-item {
+  display: none;
+}
+#checkout .checkout-step#review.checkout-step .modal-body .review-cart .checkout-totals {
+  float: none;
+  width: 100%;
+}
 #checkout .checkout-step#message .modal-body div {
   width: 100%;
 }
@@ -1016,15 +997,92 @@ html body #checkout .checkoutReview {
   font-size: 25px;
   margin: 2px 10px 0 0;
 }
+#payment.checkout-step input#show-billing-address-fields {
+  float: left;
+  margin: 2px 8px 0 0;
+}
 #billing-address {
   display: none;
+  margin: 22px 0 -10px 0 !important;
 }
-#review.checkout-step .product-subtotal {
-  display: none !important;
+#checkout form#stripe-payment-form .payment-method-container:before,
+#checkout form#stripe-payment-form .payment-method-container:after {
+  content: " ";
+  display: table;
 }
-#review.checkout-step a.remove-handbasket-item {
-  width: 30px !important;
-  margin: -2px 0 0 0 !important;
+#checkout form#stripe-payment-form .payment-method-container:after {
+  clear: both;
+}
+#checkout form#stripe-payment-form .payment-method-container ul.cc-icons {
+  float: left;
+  margin: 0 0 20px 0;
+}
+#checkout form#stripe-payment-form .payment-method-container ul.cc-icons:before,
+#checkout form#stripe-payment-form .payment-method-container ul.cc-icons:after {
+  content: " ";
+  display: table;
+}
+#checkout form#stripe-payment-form .payment-method-container ul.cc-icons:after {
+  clear: both;
+}
+#checkout form#stripe-payment-form .payment-method-container ul.cc-icons li.cc-icon {
+  width: 32px;
+  height: 32px;
+  float: left;
+  list-style: none;
+}
+#checkout form#stripe-payment-form .payment-method-container ul.cc-icons li.cc-icon img {
+  display: none;
+}
+#checkout form#stripe-payment-form .payment-method-container ul.cc-icons li.cc-icon img.active {
+  display: block;
+}
+#checkout form#stripe-payment-form .payment-method-container .or {
+  display: none;
+  float: left;
+  font-size: 10px;
+  margin: 2px 0 0 34px;
+}
+#checkout form#stripe-payment-form .payment-method-container .paypal-checkout {
+  width: 120px;
+  float: right;
+}
+#checkout form#stripe-payment-form .input-group.expiry {
+  width: 50%;
+}
+#checkout form#stripe-payment-form .input-group.cvc {
+  width: 50%;
+}
+#checkout form#stripe-payment-form .input-group {
+  margin-left: 0;
+}
+#checkout form#stripe-payment-form .input-group input[data-stripe="number"] {
+  padding-top: 20px;
+  padding-bottom: 20px;
+  border-bottom-color: #edeeed;
+  margin: 0;
+  -webkit-border-radius: 4px 4px 0 0;
+  -moz-border-radius: 4px 4px 0 0;
+  border-radius: 4px 4px 0 0;
+}
+#checkout form#stripe-payment-form .input-group input[data-stripe="expiry"] {
+  padding-top: 20px;
+  padding-bottom: 20px;
+  border-top: none;
+  border-right-color: #edeeed;
+  float: left;
+  -webkit-border-radius: 0 0 0 4px;
+  -moz-border-radius: 0 0 0 4px;
+  border-radius: 0 0 0 4px;
+}
+#checkout form#stripe-payment-form .input-group input[data-stripe="cvc"] {
+  padding-top: 20px;
+  padding-bottom: 20px;
+  border-top: none;
+  border-left: none;
+  -webkit-border-radius: 0 0 4px 0;
+  -moz-border-radius: 0 0 4px 0;
+  border-radius: 0 0 4px 0;
 }
 @media (min-width: 500px) {
   #checkout .checkout-header,
@@ -1036,7 +1094,10 @@ html body #checkout .checkoutReview {
   #checkout .checkout-header {
     margin: 10% auto 0;
   }
-  #checkout .checkout-step .ste .step-name {
+  #checkout .checkout-step .step-name {
+    display: block;
+  }
+  #checkout form#stripe-payment-form .payment-method-container .or {
     display: block;
   }
 }

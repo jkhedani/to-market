@@ -330,14 +330,13 @@ jQuery( document ).ready( function($) {
 	})();
 
 	//
+	//
 	// Checkout Event Listeners
 	//
+	//
 
-	/**
-	 * Copy shipping address values to billing address values
-	 * @event
-	 */
-	$(document).on('keyup','form#shipping-address input', function(){
+	// @event Copy shipping address values to billing address values
+	$(document).on('keyup','form#shipping-address input', function() {
 		var input_target = $(this).data('target');
 		var input_data = $(this).val();
 		delay( function() {
@@ -345,10 +344,7 @@ jQuery( document ).ready( function($) {
 		}, 4000);
 	});
 
-	/**
-	 * Show billing address field
-	 * @event
-	 */
+	// @event Show billing address field
 	$(document).on( 'click', '#show-billing-address-fields', function() {
 		if ( $("#show-billing-address-fields").is(':checked') ) {
 			$('#billing-address').show();
@@ -358,7 +354,7 @@ jQuery( document ).ready( function($) {
 		}
 	});
 
-	// # Allow tabbed interface through checkout
+	// @event Allow tabbed interface through checkout
 	$(document).on('click', '.checkout-tab', function() {
 		// Remove current class from all tabs
 		$('.checkout-tabs a').removeClass('current');
@@ -371,41 +367,25 @@ jQuery( document ).ready( function($) {
 		return false;
 	});
 
-	// # Create event listener for next buttons
-	$(document).on('click', 'a.checkout-next', function() {
+	// @event Select a checkout tab.
+	$(document).on('click', 'a.select-checkout-tab', function() {
 		var target_step = $(this).data('target');
 		$('ul.checkout-tabs li a[data-target="'+target_step+'"]').click();
 		return false;
 	});
 
-	// SHOW
-	$(document).on( 'show.bs.modal', '#checkout', function() {
-		// ADD Hand Basket Items to Checkout
-		var handbasket_items = refresh_handbasket('raw');
-		$(document).find('#review.checkout-step .modal-body .hand-basket-product').remove();
-		$(document).find('#review.checkout-step .modal-body .checkout-totals').remove();
-		$(document).find('#review.checkout-step .modal-body').prepend( handbasket_items );
-	});
-
-	// SHOWN
+	// @event Prevent page scrolling when modal is present
 	$(document).on( 'shown.bs.modal', '#checkout', function() {
-		// # Prevent page scrolling when modal is present
 		$('html').css( 'overflow', 'hidden' );
 		$('html').addClass('fixed');
 
 	});
 
-	// HIDDEN
+	// @event Restore scrolling functionality
 	$(document).on( 'hidden.bs.modal', '#checkout', function() {
-		// # Restore scrolling functionality
 		$('html').css( 'overflow-y', 'scroll' );
 		$('html').removeClass('fixed');
 	});
-
-	// CREATE Checkout
-	//	 It seems that the modal should probably be called last
-	//	 or at least before all the event listners
-	$('#checkout').modal({ show : false, });
 
 	// QUERY VARIABLES
 	// # Display checkout via URL query
@@ -427,7 +407,7 @@ jQuery( document ).ready( function($) {
 		}
 	}
 
-	// # Display checkout via click event
+	// @event Display checkout via click event
 	$(document).on('click', '[data-toggle="checkout"]', function() {
 		// Click the first tab to show first step
 		$(document).find('#checkout .checkout-tab[data-target="1"]').click();
@@ -436,58 +416,37 @@ jQuery( document ).ready( function($) {
 		$('#checkout').modal('show');
 	});
 
+	// @event Populate review step with shipping address
+	//var shipping_address = convert_form_to_json( $('form#shipping-address') );
+	//console.log( shipping_address );
 
-/******************************************************************************/
-/********************************* EasyPost ***********************************/
-/******************************************************************************/
-
-	// # Populate shipping address field (possibly on keyup)
-	// $(document).on( 'keyup', 'input.address', function() {
-	// 	var $(this).data('shipping-target');
-	// });
-
-	// Address info - this isn't going to work for optional fields...might
-	// want to connect to client side validation classes (if has error class)
-	var verify_address = function() {
-		// # Assume address is filled out until proven otherwise
-		var shipping_address_exists = true;
-		// # Create an array of objects containing name/value pairs of forms
-		var shipping_address = $('#shipping-address').serializeArray();
-		for ( i = 0; i < shipping_address.length; i++ ) {
-			// # If any value is empty.
-			if ( !shipping_address[i]['value'] ) {
-				// # Indicate that shipping address is not available.
-				$('#checkout .checkout-tabs [data-target="1"]').click();
-				// # Show alert message
-				$('#checkout .checkout-step#basic .alert-message span').html('Please ensure your shipping address is properly filled out.');
-				$('#checkout .checkout-step#basic .alert-message').show();
-				return false;
-			}
+	// @event Populate Card review
+	$(document).on('blur', 'input[data-stripe="cvc"]', function() {
+		var card_number = $(document).find('form#stripe-payment-form input[data-stripe="number"]');
+		if ( $.payment.cardType === 'amex' ) {
+			var card_number_last_digits = card_number.val().slice(-5);
+		} else if ( $.payment.cardType === 'dinersclub' ) {
+			var card_number_last_digits = card_number.val().slice(-2);
+		} else {
+			var card_number_last_digits = card_number.val().slice(-4);
+			console.log(card_number_last_digits);
 		}
+		var card_overview = '•••• •••• •••• ' + card_number_last_digits;
+		$(document).find('#checkout .review-payment-method').append( card_overview );
+	});
 
-		if ( shipping_address_exists === true ) {
+	// @event Add Hand Basket Items to Checkout
+	$(document).on( 'show.bs.modal', '#checkout', function() {
+		var handbasket_items = refresh_handbasket('raw');
+		$(document).find('#review.checkout-step .modal-body .review-cart .hand-basket-product').remove(); // Clear existing
+		$(document).find('#review.checkout-step .modal-body .review-cart .checkout-totals').remove(); // Clear existing
+		$(document).find('#review.checkout-step .modal-body .review-cart').append( handbasket_items );
+	});
 
-			// $(this).parents('.checkout-step').find('.overlay.loading').show(); // Show loading message
-			// $.post(shopping_cart_scripts.ajaxurl, {
-			// 	dataType: "jsonp",
-			// 	action: 'verify_shipping_address',
-			// 	nonce: shopping_cart_scripts.nonce,
-			// 	products: jProducts,
-			// }, function(response) {
-			// 	if ( response.success === true ) {
-			// 		$(this).parents('.checkout-step').find('.overlay.loading').hide(); // Show loading message
-			// 	}
-			// });
+	// @event Create Checkout (create as "last" as possible)
+	$('#checkout').modal({ show : false, });
 
-		// # Inform customer that all address fields have not been filled out
-		}
-	}
-
-	/**
-	 * Process checkout
-	 * @event
-	 * Submit shipping infor, create stripe token,
-	 */
+	// @event Process checkout
  	$(document).on('click', '[data-action="checkout"]', function() {
 
 		// ### Show processing checkout
@@ -600,6 +559,19 @@ jQuery( document ).ready( function($) {
 			this.prev().addClass('ok');
 		}
 
+		// @function Indicate selected payment method
+		var show_payment_method = function( cardtype ) {
+			$(document).find('ul.cc-icons li img').each( function() {
+				if ( $(this).hasClass('bw') ) {
+					$(this).addClass('active');
+				} else {
+					$(this).removeClass('active');
+				}
+			});
+			$(document).find('ul.cc-icons li.'+ cardtype +' img.bw').removeClass('active');
+			$(document).find('ul.cc-icons li.'+ cardtype +' img.color').addClass('active');
+		}
+
 		// @event Check if the field is blank.
 		if ( input.val() === "" ) {
 			input.has_error( "This field is blank." );
@@ -612,6 +584,7 @@ jQuery( document ).ready( function($) {
 				input.has_error( "The card number is not a valid card number." );
 				return false;
 			}
+			show_payment_method( $.payment.cardType( input.val() ) );
 		}
 		// @event Validate Card Expiry.
 		if ( input.data('stripe') === 'expiry' ) {
@@ -628,17 +601,6 @@ jQuery( document ).ready( function($) {
 			}
 		}
 
-
-		// Validate email
-		// if ( $(this).hasClass('customer-email') ) {
-		//   if ( !isValidEmailAddress( $(this).val() ) ) {
-		//     $(this).prev().addClass('error');
-		//   } else {
-		//     $(this).prev().removeClass('error');
-		//   }
-		// }
-		// set field state (ok or error)
-
 		// If field validates, mark as ok
 		$(this).is_ok();
 
@@ -649,32 +611,3 @@ jQuery( document ).ready( function($) {
 	// # Validate Payments
 
 }); // jQuery
-
-
-
-// /**
-// * 	jQuery Click Price Selection
-// *	Changes front facing cost display values.
-// */
-// // If a product option selected is different than the current price and the price is not empty
-// $('.jquery-color-selection a').on('click',function() {
-// 	var standardPrice = $('body').find('.product-price').data('standard-product-price');
-// 	var optionPrice = $('.product-color-selection').find(':selected').data('option-price');
-// 	var displayedText = $('body .product-price').text();
-// 	// Animate price if current option price is different from the product standard price or if the displayed price is  and is not equal to zero dollars.
-// 	if ( ( ( standardPrice != optionPrice ) || ( displayedText != standardPrice ) ) && ( optionPrice != '$0.00' ) ) {
-// 		// If option price is showing, insert Standard Price
-// 		if ( displayedText ==  optionPrice ) {
-// 			var priceToDisplay = standardPrice;
-// 		// If standard price is showing, insert Option Price
-// 		} else if ( displayedText == standardPrice ) {
-// 			var priceToDisplay = optionPrice;
-// 		}
-// 		// Animate the price
-// 		$( "body .product-price" ).animate({
-// 			opacity: 0,
-// 		}, 400, function() {
-// 			$('body .product-price').html(optionPrice).css('opacity','1.0');
-// 		});
-// 	}
-// });
