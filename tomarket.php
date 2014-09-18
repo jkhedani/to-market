@@ -369,7 +369,7 @@ function render_checkout() {
       <div class="modal-header">
 
         <!-- Successful Payment -->
-        <h3 class="checkout-step-title successful-payment">'. __('Successful Payment','litton_bags') .'</h3>
+        <h3 class="checkout-step-title successful-payment">'. __('Thank you!','litton_bags') .'</h3>
 
       </div>
       <div class="modal-body">
@@ -377,7 +377,7 @@ function render_checkout() {
         <!-- Successful Payment -->
         <div class="successful-payment">
           <img src="'.$path_to_plugin_uri.'/assets/media/payment-success.jpg" />
-          <h4>You have successfully made a payment. An email with your shipping label and confirmation has been sent to you.</h4>
+          <h4>Your payment has been successfully processed! An email with your shipping label and confirmation has been sent to you.</h4>
         </div>
 
         <!-- Error -->
@@ -447,6 +447,7 @@ function process_checkout() {
     $shippingaddress = $_REQUEST['shippingaddress'];
     $stripetoken = $_REQUEST['stripetoken'];
     $basketcontents = $_REQUEST['basketcontents'];
+    $orderNumber = generateRandomOrderNumber( 10 ); // generate random order number
 
     // Determine True Cost of Basket
     $subtotal = 0;
@@ -492,6 +493,13 @@ function process_checkout() {
     if ( isset($verified_address) && !empty($verified_address) ) {
       require_once( dirname( __FILE__ ) . '/lib/Stripe/lib/Stripe.php'); // Load Stripe Client Library (PHP)
       Stripe::setApiKey( stripe_api_key('secret') ); // # Present Secret API Key
+      // Order number, product details and customer email for Stripe
+      $desc  = 'Customer email:' . $basicinfo['customer-email'];
+      $desc .= ' OrderNumber: ' . $orderNumber;
+      foreach ( $basketcontents as $sku => $data ) {
+      $desc .= 'Product: ' . $sku . ', Quantity: ' . $data['product_qty'];
+      }
+      // Attempt charge.
       try {
         $charge = Stripe_Charge::create( array(
           "amount" => $grandtotal, // amount in cents, again
@@ -565,6 +573,39 @@ function process_checkout() {
       }
 
       // Send success emails!
+      function set_html_content_type() { return 'text/html'; } // HTML set content type for sending html through WP_Mail
+      add_filter( 'wp_mail_content_type', 'set_html_content_type' );
+			// ADMIN Email
+			$htmlMessage  = '<p><img src="'.get_stylesheet_directory_uri().'/images/logo.png" alt="Litton Fine Camera Bags" /></p>';
+			$htmlMessage .=	'<p>Order Number: #'.$orderNumber.'</p>';
+			$htmlMessage .=	'<p>New product(s) await to be shipped: </p>';
+      foreach ($shipmentLabels as $shipmentLabel) {
+      $htmlMessage .=  $shipmentLabel->postage_label->label_url . '</br>';
+			}
+      $htmlMessage .=  '<p>Product details: '.$desc.'</p><p>Note: It may be beneficial if you verify this purchase at your <a href="https://manage.stripe.com">Stripe Dashboard</a> :)</p>
+			';
+      // Send to all admins.
+      if ( ! explode(", ", get_field('admin_email_address')) ) {
+        $adminemail = get_field('admin_email_address');
+        wp_mail(  $adminemail, 'A New Product(s) Requires Shipping!', $htmlMessage );
+      } else {
+        $adminemails = explode(", ", get_field('admin_email_address'));
+        foreach ( $adminemails as $adminemail ){
+          wp_mail(  $adminemail, 'A New Product(s) Requires Shipping!', $htmlMessage );
+        }
+      }
+
+			// CUSTOMER Email
+			$customerEmail = strip_tags( trim( $basicinfo['customer-email'] ) );
+			$htmlMessage  = '<p><img src="'.get_stylesheet_directory_uri().'/images/logo.png" alt="Litton Fine Camera Bags" /></p>';
+		  $htmlMessage .= '<p>Order Number: #'.$orderNumber.'</p>';
+      foreach ($shipmentLabels as $shipmentLabel) {
+        //error_log($shipmentLabel);
+        $htmlMessage .= '<p>'.$shipmentLabel->rates[0]->carrier.' Tracking Number: #'.$shipmentLabel->tracking_code.'</p>';
+      }
+			$htmlMessage .= '<p>Product details: '.$desc.'</p>';
+			wp_mail( $customerEmail, 'Thanks for shopping at Litton Bags!', $htmlMessage );
+			remove_filter( 'wp_mail_content_type', 'set_html_content_type' ); // Reset content-type to avoid conflicts -- http://core.trac.wordpress.org/ticket/23578
 
     } catch( Exception $e ) {
       error_log($shipment->postage_label->label_url);
