@@ -225,7 +225,7 @@ html body {
 
   color: @darkGray;
   font-weight: normal;
-  h4 { font-weight: normal; text-align: center; line-height: 1.2; font-size: 16px; }
+  h4 { line-height: 1.2; font-size: 12px; text-transform: uppercase; }
 
   // Checkout form styles
   form { margin-bottom: 8px; }
@@ -352,15 +352,36 @@ html body {
       .modal-body {
         .product-subtotal { display: none !important; }
         a.remove-handbasket-item { width: 30px !important; margin: -2px 0 0 0 !important; }
+        h4 { float: left; margin-top: 0; }
+        a.edit-tab {
+          float: right;
+          font-size: 12px;
+          text-transform: uppercase;
+          color: @darkGray  ;
+        }
+        .review-row { .clearfix(); }
+        .review-row-content { clear: both; }
+        // Shipping & Billing Review
+        .shipping-address, .billing-address {
+          float: left;
+          width: 162px;
+          overflow: hidden;
+        }
+        .shipping-address { margin-right: 20px; }
         // Cart Review
         .review-cart {
           .hand-basket-product {
-            .product-preview { width: 38px; }
-            .product-qty { float: left; }
+            .product-preview { width: 32px; }
+            .product-description { width: 168px;
+              //.product-title { font-weight: 600; }
+            }
+            .product-qty { float: right; }
             .product-price { display: none; }
             .remove-handbasket-item { display: none; }
           }
-          .checkout-totals { float: none; width: 100%; }
+          .checkout-totals { float: none; width: 100%;
+            .total { font-weight: 600; font-size: 14px; }
+          }
         }
       }
     } // #review step3

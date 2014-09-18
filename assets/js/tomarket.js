@@ -252,7 +252,7 @@ jQuery( document ).ready( function($) {
 	 */
 
 	// # Checkout Testing Parameters
-	var allow_dev_inputs = true;
+	var allow_dev_inputs = false;
 	function insert_dev_inputs ( steps ) {
 		// Step "Basic"
 		function input_step_basic_dev_data() {
@@ -336,19 +336,18 @@ jQuery( document ).ready( function($) {
 	//
 
 	// @event Copy shipping address values to billing address values
-	$(document).on('keyup','form#shipping-address input', function() {
-		var input_target = $(this).data('target');
-		var input_data = $(this).val();
-		delay( function() {
-			$(document).find('form#billing-address input[data-stripe="'+input_target+'"]').val( input_data );
-		}, 4000);
-	});
+	// $(document).on('keyup','form#shipping-address input', function() {
+	// 	var input_target = $(this).data('target');
+	// 	var input_data = $(this).val();
+	// 	delay( function() {
+	// 		$(document).find('form#billing-address input[data-stripe="'+input_target+'"]').val( input_data );
+	// 	}, 4000);
+	// });
 
 	// @event Show billing address field
 	$(document).on( 'click', '#show-billing-address-fields', function() {
 		if ( $("#show-billing-address-fields").is(':checked') ) {
 			$('#billing-address').show();
-			$(document).find('form#billing-address input').val('');
 		} else {
 			$('#billing-address').hide();
 		}
@@ -387,6 +386,14 @@ jQuery( document ).ready( function($) {
 		$('html').removeClass('fixed');
 	});
 
+	// @event Add Hand Basket Items to Checkout
+	$(document).on( 'shown.bs.modal', '#checkout', function() {
+		var handbasket_items = refresh_handbasket('raw');
+		$(document).find('#review.checkout-step .modal-body .review-cart .hand-basket-product').remove(); // Clear existing
+		$(document).find('#review.checkout-step .modal-body .review-cart .checkout-totals').remove(); // Clear existing
+		$(document).find('#review.checkout-step .modal-body .review-cart .cart-items').append( handbasket_items );
+	});
+
 	// QUERY VARIABLES
 	// # Display checkout via URL query
 	if ( get_query_variable('checkout') === 'yes' ) {
@@ -416,12 +423,47 @@ jQuery( document ).ready( function($) {
 		$('#checkout').modal('show');
 	});
 
-	// @event Populate review step with shipping address
-	//var shipping_address = convert_form_to_json( $('form#shipping-address') );
-	//console.log( shipping_address );
+	// @event Populate review steps when third tab is clicked
+	$(document).on('click','.checkout-tab[data-target="3"]',function(){
 
-	// @event Populate Card review
-	$(document).on('blur', 'input[data-stripe="cvc"]', function() {
+		// @event Populate shipping address review
+		$(document).find('#checkout .review-address .review-shipping-address').empty();
+		var shipping_address_review = convert_form_to_json( $('form#shipping-address') );
+		var ship_address  = shipping_address_review['shipping-address-line1'] + '</br>';
+				if ( shipping_address_review['shipping-address-line2'] !== "" )
+				ship_address += shipping_address_review['shipping-address-line2'] + '</br>';
+				ship_address += shipping_address_review['shipping-address-city'] + ', ';
+				ship_address += shipping_address_review['shipping-address-state'] + ' ';
+				ship_address += shipping_address_review['shipping-address-zip'] + '</br>';
+				ship_address += shipping_address_review['shipping-address-country'];
+		// Append address to review
+		$(document).find('#checkout .review-address .review-shipping-address').append( ship_address );
+
+		// @event Populate billing address review
+		$(document).find('#checkout .review-address .review-billing-address').empty();
+		var billing_address = {};
+		$(document).find('form#billing-address input').each(function() {
+			var key = $(this).data('stripe');
+			billing_address[key] = $(this).val();
+		});
+		var address  = billing_address['address-line1'] + '</br>';
+				if ( billing_address['address-line2'] !== "" )
+				address += billing_address['address-line2'] + '</br>';
+				address += billing_address['address-city'] + ', ';
+				address += billing_address['address-state'] + ' ';
+				address += billing_address['address-zip'] + '</br>';
+				address += billing_address['address-country'];
+		// Append billing address to review if it differs from shipping. Otherwise,
+		// just load the shipping address.
+		if ( $("#show-billing-address-fields").is(':checked') ) {
+			$(document).find('#checkout .review-address .review-billing-address').append( address );
+		} else {
+			$(document).find('#checkout .review-address .review-billing-address').append( ship_address );
+		}
+
+		// @event Populate Card review
+		// Clear the details DOM for next insertion
+		$(document).find('#checkout .review-payment-method .card-details').empty();
 		var card_number = $(document).find('form#stripe-payment-form input[data-stripe="number"]');
 		if ( $.payment.cardType === 'amex' ) {
 			var card_number_last_digits = card_number.val().slice(-5);
@@ -429,18 +471,11 @@ jQuery( document ).ready( function($) {
 			var card_number_last_digits = card_number.val().slice(-2);
 		} else {
 			var card_number_last_digits = card_number.val().slice(-4);
-			console.log(card_number_last_digits);
 		}
 		var card_overview = '•••• •••• •••• ' + card_number_last_digits;
-		$(document).find('#checkout .review-payment-method').append( card_overview );
-	});
-
-	// @event Add Hand Basket Items to Checkout
-	$(document).on( 'show.bs.modal', '#checkout', function() {
-		var handbasket_items = refresh_handbasket('raw');
-		$(document).find('#review.checkout-step .modal-body .review-cart .hand-basket-product').remove(); // Clear existing
-		$(document).find('#review.checkout-step .modal-body .review-cart .checkout-totals').remove(); // Clear existing
-		$(document).find('#review.checkout-step .modal-body .review-cart').append( handbasket_items );
+		// Append the card overview + image
+		$(document).find('#checkout .review-payment-method .card-details').append( card_overview );
+		$(document).find('#checkout .cc-icon img.color.active').clone().prependTo('#checkout .review-payment-method .card-details').css('margin-right','10px');
 	});
 
 	// @event Create Checkout (create as "last" as possible)
@@ -449,19 +484,30 @@ jQuery( document ).ready( function($) {
 	// @event Process checkout
  	$(document).on('click', '[data-action="checkout"]', function() {
 
-		// ### Show processing checkout
+		// Show processing checkout
 		$('#checkout .overlay.loading').show(); // # Bring up "Processing Payment"
 		$(this).prop('disabled', true); // Disable submission to avoid double submits
 
-		// ### Basic Info (Used by multiple services)
+		// Basic Info (Used by multiple services)
 		var basic_info = convert_form_to_json( $('form#basic-info') );
 
-		// ### Shipping Address
+		// Shipping Address
 		// If shipping address is filled out, serialize data for processing.
 		// Convert serialized data to a json object for parsing later
 		var shipping_address = convert_form_to_json( $('form#shipping-address') );
 
-		// ### Basket Info
+		// Billing Address
+		if ( $("#show-billing-address-fields").is(':checked') ) {
+			var billing_address = {};
+			$(document).find('form#billing-address input').each(function() {
+				var key = $(this).data('stripe');
+				billing_address[key] = $(this).val();
+			});
+		} else {
+			var billing_address = shipping_address;
+		}
+
+		// Basket Info
 		var basket_contents = {};
 		for ( i = 0; i < simpleStorage.index().length; i++ ) {
 			basket_contents[ simpleStorage.index()[i] ] = simpleStorage.get( simpleStorage.index()[i] );
@@ -495,6 +541,7 @@ jQuery( document ).ready( function($) {
 					action: 'process_checkout',
 					basicinfo: basic_info,
 					shippingaddress: shipping_address,
+					shippingaddress: billing_address,
 					stripetoken: stripe_token,
 					basketcontents: basket_contents,
 					redirectURL: document.URL,
@@ -586,13 +633,13 @@ jQuery( document ).ready( function($) {
 			}
 			show_payment_method( $.payment.cardType( input.val() ) );
 		}
-		// @event Validate Card Expiry.
-		if ( input.data('stripe') === 'expiry' ) {
-			if ( ! $.payment.validateCardExpiry( input.val() ) ) {
-				input.has_error( "The card expiry is not valid." );
-				return false;
-			}
-		}
+		// @event Validate Card Expiry (function seems to be tripping on something)
+		// if ( input.data('stripe') === 'expiry' ) {
+		// 	if ( ! $.payment.validateCardExpiry( input.val() ) ) {
+		// 		input.has_error( "The card expiry is not valid." );
+		// 		return false;
+		// 	}
+		// }
 		// @event Validate CVC.
 		if ( input.data('stripe') === 'cvc' ) {
 			if ( ! $.payment.validateCardCVC( input.val() ) ) {
@@ -606,8 +653,26 @@ jQuery( document ).ready( function($) {
 
 	});
 
-	// # Validate Info
-		// Email
-	// # Validate Payments
+	/** * * * PayPal * * * **/
+
+	/**
+	 *	Start Payment Process for PayPal Users
+	 *	@event
+	 */
+	$(document).on('click', '#checkout-with-paypal', function (){
+
+		$.post( to_market_scripts.ajaxurl, {
+			dataType: "jsonp",
+			action: 'paypal_prepare_payment',
+			nonce: to_market_scripts.nonce,
+		}, function(response) {
+			if ( response.success === true ) {
+				console.log('asdf');
+				window.location = response.redirecturl;
+			}
+		});
+	});
+
+
 
 }); // jQuery

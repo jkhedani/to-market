@@ -739,10 +739,9 @@ html body #checkout .checkoutReview {
   font-weight: normal;
 }
 #checkout h4 {
-  font-weight: normal;
-  text-align: center;
   line-height: 1.2;
-  font-size: 16px;
+  font-size: 12px;
+  text-transform: uppercase;
 }
 #checkout form {
   margin-bottom: 8px;
@@ -966,11 +965,44 @@ html body #checkout .checkoutReview {
   width: 30px !important;
   margin: -2px 0 0 0 !important;
 }
+#checkout .checkout-step#review.checkout-step .modal-body h4 {
+  float: left;
+  margin-top: 0;
+}
+#checkout .checkout-step#review.checkout-step .modal-body a.edit-tab {
+  float: right;
+  font-size: 12px;
+  text-transform: uppercase;
+  color: #737a7d;
+}
+#checkout .checkout-step#review.checkout-step .modal-body .review-row:before,
+#checkout .checkout-step#review.checkout-step .modal-body .review-row:after {
+  content: " ";
+  display: table;
+}
+#checkout .checkout-step#review.checkout-step .modal-body .review-row:after {
+  clear: both;
+}
+#checkout .checkout-step#review.checkout-step .modal-body .review-row-content {
+  clear: both;
+}
+#checkout .checkout-step#review.checkout-step .modal-body .shipping-address,
+#checkout .checkout-step#review.checkout-step .modal-body .billing-address {
+  float: left;
+  width: 162px;
+  overflow: hidden;
+}
+#checkout .checkout-step#review.checkout-step .modal-body .shipping-address {
+  margin-right: 20px;
+}
 #checkout .checkout-step#review.checkout-step .modal-body .review-cart .hand-basket-product .product-preview {
-  width: 38px;
+  width: 32px;
+}
+#checkout .checkout-step#review.checkout-step .modal-body .review-cart .hand-basket-product .product-description {
+  width: 168px;
 }
 #checkout .checkout-step#review.checkout-step .modal-body .review-cart .hand-basket-product .product-qty {
-  float: left;
+  float: right;
 }
 #checkout .checkout-step#review.checkout-step .modal-body .review-cart .hand-basket-product .product-price {
   display: none;
@@ -981,6 +1013,10 @@ html body #checkout .checkoutReview {
 #checkout .checkout-step#review.checkout-step .modal-body .review-cart .checkout-totals {
   float: none;
   width: 100%;
+}
+#checkout .checkout-step#review.checkout-step .modal-body .review-cart .checkout-totals .total {
+  font-weight: 600;
+  font-size: 14px;
 }
 #checkout .checkout-step#message .modal-body div {
   width: 100%;

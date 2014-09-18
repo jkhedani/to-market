@@ -247,7 +247,7 @@ function render_checkout() {
               </li>
             </ul>
             <div class="or">- or -</div>
-            <a class="paypal-checkout" href="javascript:void(0);" title="Checkout via Paypal instead." data-payment-method="paypal"><img src="'.$path_to_plugin_uri.'/assets/media/paypal-checkout-icon.png" alt="Checkout via Paypal instead." /></a>
+            <a id="checkout-with-paypal" class="paypal-checkout" href="javascript:void(0);" title="Checkout via Paypal instead." data-payment-method="paypal"><img src="'.$path_to_plugin_uri.'/assets/media/paypal-checkout-icon.png" alt="Checkout via Paypal instead." /></a>
           </div>
 
           <div class="input-group">
@@ -330,14 +330,32 @@ function render_checkout() {
         <h3 class="checkout-step-title">'. __('Review','litton_bags') .'</h3>
       </div>
       <div class="modal-body">
-        <div class="review-shipping-address">
-          Shipping Address
-          <a href="#basic" data-target="1" class="select-checkout-tab">Edit</a>
+
+        <div class="review-address review-row">
+          <a href="#basic" data-target="1" class="select-checkout-tab edit-tab"><i class="fa fa-pencil"></i></a>
+          <div class="shipping-address">
+            <h4>Shipping Address</h4>
+            <div class="review-shipping-address review-row-content"></div>
+          </div>
+          <div class="billing-address">
+            <h4>Billing Address</h4>
+            <div class="review-billing-address review-row-content"></div>
+          </div>
         </div>
         <hr />
-        <div class="review-payment-method">Brief of payment method</div>
+
+        <div class="review-payment-method review-row">
+          <h4>Payment method</h4>
+          <a href="#basic" data-target="2" class="select-checkout-tab edit-tab"><i class="fa fa-pencil"></i></a>
+          <div class="card-details review-row-content"></div>
+        </div>
         <hr />
-        <div class="review-cart">List of basket items</div>
+
+        <div class="review-cart review-row">
+          <h4>Cart items</h4>
+          <div class="cart-items review-row-content"></div>
+        </div>
+
       </div>
       <div class="checkout-footer">
         <a class="mint" href="#" data-action="checkout">Checkout</a>
@@ -366,7 +384,7 @@ function render_checkout() {
       <div class="checkout-footer">
       </div>
       <div class="overlay loading"><i class="spinner medium"></i><div class="overlay-message-container"><h4>Processing Payment</h4></div></div>
-    </div><!-- end ste 4
+    </div><!-- end step 4 -->
 
     </div><!-- .modal-dialog -->
 
@@ -377,6 +395,7 @@ function render_checkout() {
 }
 add_action('wp_footer','render_checkout');
 
+// # Stripe API
 function stripe_api_key( $type ) {
   if ( $type === 'secret' ) {
     if ( get_field( 'stripe_api_mode', 'option' ) === true ) {
@@ -398,7 +417,6 @@ function set_easypost_api_key() {
   return $stripe_api_key;
 }
 
-
 // Verify Checkout Charge Amount
 // @desc  A helper function to ensure no one is affecting prices
 //        at checkout.
@@ -408,8 +426,10 @@ function verify_checkout_charge_amount( $basketitems ) {
   // # Retrieve submitted cart contents (sku + qty)
 }
 
-
-
+/**
+ * Process Checkout
+ * @since 1.2.0
+ */
 function process_checkout() {
 
     // ### Nonce Verification
@@ -558,110 +578,162 @@ function process_checkout() {
       }
 
     } // if address is verified
-
-
-
 }
 add_action('wp_ajax_nopriv_process_checkout', 'process_checkout');
 add_action('wp_ajax_process_checkout', 'process_checkout');
 
-//Run Ajax calls even if user is logged in
-// if ( isset($_REQUEST['action']) && ($_REQUEST['action']=='process_checkout') ):
-//   do_action( 'wp_ajax_' . $_REQUEST['action'] );
-//   do_action( 'wp_ajax_nopriv_' . $_REQUEST['action'] );
-// endif;
+
+
 
 /**
- * Process Stripe Payment
- * Listen for Stripe: Payment requests
+ * PayPal
+ * @since 1.2.0
  */
-function process_stripe_payment() {
-  // Verify the client request is legit upon Stripe payment form submission
-  if ( isset( $_POST['form-type'] ) && $_POST['form-type'] === 'stripe-payment' && wp_verify_nonce( $_REQUEST['_wpnonce'], 'stripe-payment' ) ) {
-    // Load Stripe Client Library (PHP)
-    require_once( dirname( __FILE__ ) . '/lib/Stripe/lib/Stripe.php');
-    // # Present Secret API Key
-    Stripe::setApiKey( stripe_api_key('secret') );
-    // # Retrieve Payment Token from Submitted Form
-    $token = $_POST['stripeToken'];
-    // # Calculate product costs here
-    // # Attempt to charge the Card
-    try {
-      $charge = Stripe_Charge::create(array(
-        "amount" => 38639, // amount in cents, again
-        "currency" => "usd",
-        "card" => $token,
-        "description" => "payinguser@example.com")
-      );
-      // Charge successful!
-      // 1. Send customer email
-      // 2. Send litton email
+use PayPal\Api\Amount;
+use PayPal\Api\Details;
+use PayPal\Api\Item;
+use PayPal\Api\ItemList;
+use PayPal\Api\Payer;
+use PayPal\Api\Payment;
+use PayPal\Api\RedirectUrls;
+use PayPal\Api\Transaction;
 
-      $redirect  = add_query_arg( array('checkout' => 'yes', 'result' => 'success'), $_POST['redirect']);
+function paypal_prepare_payment() {
 
-    } catch(Stripe_CardError $e) {
-      error_log('card declined');
-      // The card has been declined
-    }
+  // ### Nonce Verification
+  $nonce = $_REQUEST['nonce'];
+  if ( !wp_verify_nonce($nonce, 'to_market_scripts_nonce')) die(__('Busted.') );
+  $success = false;
+  $paypalRedirectURL = "";
 
-    // # Display appropriate message
-    if ( isset( $redirect ) ) {
-      wp_redirect( $redirect );
-      exit;
-    }
-  } // end if
-}
-add_action('init', 'process_stripe_payment');
+  // ### Bootstrap PayPal API
+  // Configure our API context
+  // Include the composer autoloader if we aren't already set
+  require dirname( __FILE__ ) . '/lib/PayPal/bootstrap.php';
+  session_start();
 
+  // ### Payer
+  // A resource representing a Payer that funds a payment
+  // For paypal account payments, set payment method
+  // to 'paypal'.
+  $payer = new Payer();
+  $payer->setPaymentMethod("paypal");
 
+  // ### Itemized information
+  // (Optional) Lets you specify item wise
+  // information
+  $item1 = new Item();
+  $item1->setName('Ground Coffee 40 oz')
+  	->setCurrency('USD')
+  	->setQuantity(1)
+  	->setPrice('7.50');
+  $item2 = new Item();
+  $item2->setName('Granola bars')
+  	->setCurrency('USD')
+  	->setQuantity(5)
+  	->setPrice('2.00');
 
-function easypost_create_label() {
+  $itemList = new ItemList();
+  $itemList->setItems(array($item1, $item2));
 
-  global $path_to_plugin_uri;
-  require_once( dirname( __FILE__ ) . "/lib/EasyPost/lib/easypost.php");
-  \EasyPost\EasyPost::setApiKey( set_easypost_api_key() );
-  // $to_address = \EasyPost\Address::create(
-  //     array(
-  //         "name"    => "Dirk Diggler",
-  //         "street1" => "388 Townsend St",
-  //         "street2" => "Apt 20",
-  //         "city"    => "San Francisco",
-  //         "state"   => "CA",
-  //         "zip"     => "94107",
-  //         "phone"   => "415-456-7890"
-  //     )
-  // );
-  // $from_address = \EasyPost\Address::create(
-  //     array(
-  //         "company" => "Simpler Postage Inc",
-  //         "street1" => "764 Warehouse Ave",
-  //         "city"    => "Kansas City",
-  //         "state"   => "KS",
-  //         "zip"     => "66101",
-  //         "phone"   => "620-123-4567"
-  //     )
-  // );
-  // $parcel = \EasyPost\Parcel::create(
-  //     array(
-  //         "predefined_package" => "LargeFlatRateBox",
-  //         "weight" => 76.9
-  //     )
-  // );
-  // $shipment = \EasyPost\Shipment::create(
-  //     array(
-  //         "to_address"   => $to_address,
-  //         "from_address" => $from_address,
-  //         "parcel"       => $parcel
-  //     )
-  // );
+  // ### Additional payment details
+  // Use this optional field to set additional
+  // payment information such as tax, shipping
+  // charges etc.
+  $details = new Details();
+  $details->setShipping('1.20')
+  	->setTax('1.30')
+  	->setSubtotal('17.50');
+
+  // ### Amount
+  // Lets you specify a payment amount.
+  // You can also specify additional details
+  // such as shipping, tax.
+  $amount = new Amount();
+  $amount->setCurrency("USD")
+  	->setTotal("20.00")
+  	->setDetails($details);
+
+  // ### Transaction
+  // A transaction defines the contract of a
+  // payment - what is the payment for and who
+  // is fulfilling it.
+  $transaction = new Transaction();
+  $transaction->setAmount($amount)
+  	->setItemList($itemList)
+  	->setDescription("Payment description");
+
+  // ### Redirect urls
+  // Set the urls that the buyer must be redirected to after
+  // payment approval/ cancellation.
+  $baseUrl = getBaseUrl();
+  $redirectUrls = new RedirectUrls();
+  $redirectUrls->setReturnUrl("$baseUrl/ExecutePayment.php?success=true")
+  	->setCancelUrl("$baseUrl/ExecutePayment.php?success=false");
+
+  // ### Payment
+  // A Payment Resource; create one using
+  // the above types and intent set to 'sale'
+  $payment = new Payment();
+  $payment->setIntent("sale")
+  	->setPayer($payer)
+  	->setRedirectUrls($redirectUrls)
+  	->setTransactions(array($transaction));
+
+  // ### Create Payment
+  // Create a payment by calling the 'create' method
+  // passing it a valid apiContext.
+  // (See bootstrap.php for more on `ApiContext`)
+  // The return object contains the state and the
+  // url to which the buyer must be redirected to
+  // for payment approval
+  try {
+  	$payment->create($apiContext);
+  } catch (PayPal\Exception\PPConnectionException $ex) {
+  	echo "Exception: " . $ex->getMessage() . PHP_EOL;
+  	var_dump($ex->getData());
+  	exit(1);
+  }
+
+  // ### Get redirect url
+  // The API response provides the url that you must redirect
+  // the buyer to. Retrieve the url from the $payment->getLinks()
+  // method
+  foreach($payment->getLinks() as $link) {
+  	if($link->getRel() == 'approval_url') {
+  		$redirectUrl = $link->getHref();
+  		break;
+  	}
+  }
+
+  // ### Redirect buyer to PayPal website
+  // Save the payment id so that you can 'complete' the payment
+  // once the buyer approves the payment and is redirected
+  // back to your website.
   //
-  // $shipment->buy($shipment->lowest_rate());
-  //
-  // echo $shipment->postage_label->label_url;
+  // It is not a great idea to store the payment id
+  // in the session. In a real world app, you may want to
+  // store the payment id in a database.
+  $_SESSION['paymentId'] = $payment->getId();
+  // if(isset($redirectUrl)) {
+  //   header("Location: $redirectUrl");
+  // 	exit;
+  // }
+
+
+  $paypalRedirectURL = $redirectUrl;
+  $success = true;
+  error_log($paypalRedirectURL);
+  $response = json_encode( array(
+      'success' => $success,
+      'redirecturl' => $paypalRedirectURL,
+  ));
+
+  header( 'content-type: application/json' );
+  echo $response;
+  exit;
 }
-add_action( 'init', 'easypost_create_label' );
-
-
-
+add_action( 'wp_ajax_nopriv_paypal_prepare_payment', 'paypal_prepare_payment' );
+add_action( 'wp_ajax_paypal_prepare_payment', 'paypal_prepare_payment' );
 
 ?>
