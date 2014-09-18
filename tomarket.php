@@ -380,6 +380,12 @@ function render_checkout() {
           <h4>You have successfully made a payment. An email with your shipping label and confirmation has been sent to you.</h4>
         </div>
 
+        <!-- Error -->
+        <div class="error">
+          <div class="error-message"></div>
+          <p>If you are experiencing problems with checkout, <a href="#">Contact us</a> an we\'ll get back to you right away.</p>
+        </div>
+
       </div>
       <div class="checkout-footer">
       </div>
@@ -432,17 +438,17 @@ function verify_checkout_charge_amount( $basketitems ) {
  */
 function process_checkout() {
 
-    // ### Nonce Verification
+    // Nonce Verification
     $nonce = $_REQUEST['nonce'];
     if ( !wp_verify_nonce($nonce, 'to_market_scripts_nonce')) die(__('Busted.') );
 
-    // ### Setup Data
+    // Setup Data
     $basicinfo = $_REQUEST['basicinfo'];
     $shippingaddress = $_REQUEST['shippingaddress'];
     $stripetoken = $_REQUEST['stripetoken'];
     $basketcontents = $_REQUEST['basketcontents'];
 
-    // ### Determine True Cost of Basket
+    // Determine True Cost of Basket
     $subtotal = 0;
     foreach ( $basketcontents as $sku => $data ) {
       $post_id = $data['post_id'];
@@ -459,7 +465,7 @@ function process_checkout() {
     }
     $grandtotal = floor( $subtotal + ($subtotal * get_field( 'tax_rate', 'option' )) );
 
-    // ### Verify Address via EasyPost
+    // A. Verify Address via EasyPost
     global $path_to_plugin_uri;
     require_once( dirname( __FILE__ ) . "/lib/EasyPost/lib/easypost.php");
     \EasyPost\EasyPost::setApiKey( set_easypost_api_key() );
@@ -476,10 +482,12 @@ function process_checkout() {
       $verified_address = $shipping_address->verify();
     } catch(Exception $e) {
       // We should append some but about if
+      $error_message = "Please check to make sure you are using a valide shipping address. We don't want to lose your package! Your payment has NOT been processed yet.";
       error_log($e->getMessage());
+      exit;
     }
 
-    // ### Stripe: Attempt to charge card
+    // B. Stripe: Attempt to charge card
     // If their shipping adress is valid
     if ( isset($verified_address) && !empty($verified_address) ) {
       require_once( dirname( __FILE__ ) . '/lib/Stripe/lib/Stripe.php'); // Load Stripe Client Library (PHP)
@@ -517,25 +525,39 @@ function process_checkout() {
             )
           );
 
-          //@todo: ensure correct package details are inserted for each product
-          // ! disregard throw in products.
-          $parcel = \EasyPost\Parcel::create(
-              array(
-                  "predefined_package" => "LargeFlatRateBox",
-                  "weight" => 76.8
-              )
-          );
-          $shipment = \EasyPost\Shipment::create(
-              array(
-                  "to_address"   => $to_address,
-                  "from_address" => $from_address,
-                  "parcel"       => $parcel
-              )
-          );
+          // Create a separate parcel for each product if it isn't considered throw in.
+      		$parcels = array();
+      		foreach ( $basketcontents as $sku => $data ) {
+            $post_id = $data['post_id'];
+      			if ( ! get_field('throw_in_shipping', $post_id) ) {
+    					$parcelLength = get_field( 'shipping_length', $post_id );
+    					$parcelWidth  = get_field( 'shipping_width', $post_id );
+    					$parcelHeight = get_field( 'shipping_height', $post_id );
+    					$parcelWeight = get_field( 'shipping_weight', $post_id );
+    					$parcels[] = \EasyPost\Parcel::create( array(
+    				    "length" => $parcelLength,
+    					  "width"	 => $parcelWidth,
+    					  "height" => $parcelHeight,
+    					  "weight" => $parcelWeight
+    					));
+            }
+      		} // end foreach
 
-          $shipment->buy($shipment->lowest_rate());
-          error_log($shipment->postage_label->label_url);
-
+          // Create shipping labels for each product
+          $shipmentLabels = array();
+      		foreach ($parcels as $parcel) {
+      			$shipment = \EasyPost\Shipment::create(
+      		    array(
+      	        'to_address'   => $to_address,
+      	        'from_address' => $from_address,
+      	        'parcel'       => $parcel
+      		    )
+      			);
+      			//error_log('Shipment Object:' . $shipment);
+      			//error_log('Shipment Rates:'.print_r($shipment->rates,true));
+      			$shipmentLabels[] = $shipment->buy($shipment->lowest_rate());
+      		  error_log($shipment->postage_label->label_url);
+          }
 
           // $redirect  = add_query_arg( array('checkout' => 'yes', 'step' => '4'), $_REQUEST['redirectURL']);
           // error_log( $redirect );
