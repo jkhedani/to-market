@@ -252,7 +252,7 @@ jQuery( document ).ready( function($) {
 	 */
 
 	// # Checkout Testing Parameters
-	var allow_dev_inputs = true;
+	var allow_dev_inputs = false;
 	function insert_dev_inputs ( steps ) {
 		// Step "Basic"
 		function input_step_basic_dev_data() {
