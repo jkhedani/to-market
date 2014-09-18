@@ -169,7 +169,7 @@ function render_checkout() {
           <div class="input-group">
             <label>'. __('Phone Number', 'litton_bags') .'</label>
             <div class="input-group-addon"><i class="fa fa-phone"></i></div>
-            <input type="text"  class="customer-phone form-control" size="20" autocomplete="off" class="phone" name="customer-phone" placeholder="808-123-4567" />
+            <input type="text"  class="customer-phone form-control" size="20" autocomplete="off" class="phone" name="customer-phone" placeholder="XXX-XXX-XXXX" />
           </div>
         </form>
 
@@ -198,7 +198,7 @@ function render_checkout() {
             </div>
             <div class="input-group country">
               <label>'. __('Country', 'litton_bags') .'</label>
-              <input type="text" size="20" autocomplete="off" class="country" data-target="address-country" name="shipping-address-country" placeholder="USA" />
+              <input type="text" size="20" autocomplete="off" class="country" data-target="address-country" name="shipping-address-country" placeholder="Country" />
             </div>
           </div>
 
