@@ -499,107 +499,92 @@ function process_checkout() {
           "card" => $stripetoken,
           "description" => $basicinfo['customer-email']
         ));
-
-        // ### If charge is successful, create shipping label
-        try {
-
-          $to_address = \EasyPost\Address::create(
-            array(
-              "name"    => $basicinfo['customer-name'],
-              "street1" => $shippingaddress['shipping-address-line1'],
-              "street2" => $shippingaddress['shipping-address-line2'],
-              "city"    => $shippingaddress['shipping-address-city'],
-              "state"   => $shippingaddress['shipping-address-state'],
-              "zip"     => $shippingaddress['shipping-address-zip'],
-              "phone"   => $basicinfo['customer-phone']
-            )
-          );
-          $from_address = \EasyPost\Address::create(
-            array(
-              "company" => get_field( 'dba', 'option'),
-              "street1" => get_field( 'ship_from_street1', 'option'),
-              "city"    => get_field( 'ship_from_city', 'option'),
-              "state"   => get_field( 'ship_from_state', 'option'),
-              "zip"     => get_field( 'ship_from_zip_code', 'option'),
-              "phone"   => "620-123-4567"
-            )
-          );
-
-          // Create a separate parcel for each product if it isn't considered throw in.
-      		$parcels = array();
-      		foreach ( $basketcontents as $sku => $data ) {
-            $post_id = $data['post_id'];
-      			if ( ! get_field('throw_in_shipping', $post_id) ) {
-    					$parcelLength = get_field( 'shipping_length', $post_id );
-    					$parcelWidth  = get_field( 'shipping_width', $post_id );
-    					$parcelHeight = get_field( 'shipping_height', $post_id );
-    					$parcelWeight = get_field( 'shipping_weight', $post_id );
-    					$parcels[] = \EasyPost\Parcel::create( array(
-    				    "length" => $parcelLength,
-    					  "width"	 => $parcelWidth,
-    					  "height" => $parcelHeight,
-    					  "weight" => $parcelWeight
-    					));
-            }
-      		} // end foreach
-
-          // Create shipping labels for each product
-          $shipmentLabels = array();
-      		foreach ($parcels as $parcel) {
-      			$shipment = \EasyPost\Shipment::create(
-      		    array(
-      	        'to_address'   => $to_address,
-      	        'from_address' => $from_address,
-      	        'parcel'       => $parcel
-      		    )
-      			);
-      			//error_log('Shipment Object:' . $shipment);
-      			//error_log('Shipment Rates:'.print_r($shipment->rates,true));
-      			$shipmentLabels[] = $shipment->buy($shipment->lowest_rate());
-      		  error_log($shipment->postage_label->label_url);
-          }
-
-          // $redirect  = add_query_arg( array('checkout' => 'yes', 'step' => '4'), $_REQUEST['redirectURL']);
-          // error_log( $redirect );
-          // ### Display appropriate message
-          // @todo: redirect fussy since we are making an ajax call
-          // if ( isset( $redirect ) ) {
-          //   error_log('as');
-          //   wp_redirect( $redirect );
-          //   exit;
-          // }
-          /**
-           * Build the response...
-           */
-          $success = true;
-          $response = json_encode(array(
-            'success' => $success,
-            // 'errors' => $errors,
-          ));
-
-          // Construct and send the response
-          header("content-type: application/json");
-          echo $response;
-          exit;
-
-        } catch( Exception $e ) {
-          error_log($e->getMessage());
-          // Change email messages here.
-            // One email to litton notifying her shipping label not printed.
-            // One email to customer letting them know product will be shipped
-            // ASAP and a tracking number will be emailed as well.
-        }
-
-        // send admin and customer emails
-        // click fourth tab and show success message.
-
-
       } catch(Stripe_CardError $e) {
         // The card has been declined
         error_log($e->getMessage());
+        exit;
+      }
+    } // B. if address is verified
+
+
+    // C. If charge is successful, create shipping label
+    try {
+      $to_address = \EasyPost\Address::create(
+        array(
+          "name"    => $basicinfo['customer-name'],
+          "street1" => $shippingaddress['shipping-address-line1'],
+          "street2" => $shippingaddress['shipping-address-line2'],
+          "city"    => $shippingaddress['shipping-address-city'],
+          "state"   => $shippingaddress['shipping-address-state'],
+          "zip"     => $shippingaddress['shipping-address-zip'],
+          "phone"   => $basicinfo['customer-phone']
+        )
+      );
+      $from_address = \EasyPost\Address::create(
+        array(
+          "company" => get_field( 'dba', 'option'),
+          "street1" => get_field( 'ship_from_street1', 'option'),
+          "city"    => get_field( 'ship_from_city', 'option'),
+          "state"   => get_field( 'ship_from_state', 'option'),
+          "zip"     => get_field( 'ship_from_zip_code', 'option'),
+          "phone"   => "620-123-4567"
+        )
+      );
+      // Create a separate parcel for each product if it isn't considered throw in.
+      $parcels = array();
+      foreach ( $basketcontents as $sku => $data ) {
+        $post_id = $data['post_id'];
+        if ( get_field('throw_in_shipping', $post_id) === false ) {
+          $parcelLength = get_field( 'shipping_length', $post_id );
+          $parcelWidth  = get_field( 'shipping_width', $post_id );
+          $parcelHeight = get_field( 'shipping_height', $post_id );
+          $parcelWeight = get_field( 'shipping_weight', $post_id );
+          $parcels[] = \EasyPost\Parcel::create( array(
+            "length" => $parcelLength,
+            "width"	 => $parcelWidth,
+            "height" => $parcelHeight,
+            "weight" => $parcelWeight
+          ));
+        }
+      } // end foreach
+
+      // Create shipping labels for each product
+      $shipmentLabels = array();
+      foreach ($parcels as $parcel) {
+        $shipment = \EasyPost\Shipment::create(
+          array(
+            'to_address'   => $to_address,
+            'from_address' => $from_address,
+            'parcel'       => $parcel
+          )
+        );
+        //error_log('Shipment Object:' . $shipment);
+        //error_log('Shipment Rates:'.print_r($shipment->rates,true));
+        $shipmentLabels[] = $shipment->buy($shipment->lowest_rate());
+        error_log($shipment->postage_label->label_url);
       }
 
-    } // if address is verified
+      // Send success emails!
+
+    } catch( Exception $e ) {
+      error_log($shipment->postage_label->label_url);
+      error_log($e->getMessage());
+      // Change email messages here.
+        // One email to litton notifying her shipping label not printed.
+        // One email to customer letting them know product will be shipped
+        // ASAP and a tracking number will be emailed as well.
+    }
+
+    // Send the user back no matter what! (even if easypost fails to generate label)
+    $success = true;
+    $response = json_encode(array(
+      'success' => $success,
+    ));
+
+    // Construct and send the response
+    header("content-type: application/json");
+    echo $response;
+    exit;
 }
 add_action('wp_ajax_nopriv_process_checkout', 'process_checkout');
 add_action('wp_ajax_process_checkout', 'process_checkout');
@@ -644,6 +629,23 @@ function paypal_prepare_payment() {
   // ### Itemized information
   // (Optional) Lets you specify item wise
   // information
+
+  // // Determine True Cost of Basket
+  // $subtotal = 0;
+  // foreach ( $basketcontents as $sku => $data ) {
+  //   $post_id = $data['post_id'];
+  //   if ( have_rows('product_skus', $post_id ) ) {
+  //     while ( have_rows('product_skus', $post_id) ) : the_row();
+  //       // if the sku matches the current product
+  //       if ( get_sub_field('sku') === $sku ) {
+  //         $subtotal = $subtotal + ( get_sub_field('sku_price') * $data['product_qty'] );
+  //       }
+  //     endwhile;
+  //   } else {
+  //     // Exit and send message back (someone fucking with the system)
+  //   }
+  // }
+
   $item1 = new Item();
   $item1->setName('Ground Coffee 40 oz')
   	->setCurrency('USD')
