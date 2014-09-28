@@ -111,7 +111,7 @@ function render_checkout() {
   <div class="modal fade" id="checkout" tabindex="-1" role="dialog" aria-labelledby="checkout" aria-hidden="true">
     <div class="modal-dialog checkout-dialog">
     <div class="checkout-header">
-      <a class="site-title white" href="#checkout" title="'. esc_attr( get_bloginfo( 'name', 'display' ) ) .'" rel="home">'.get_bloginfo( 'name' ).'</a>
+      <a class="site-title white" href="#checkout" title="'. esc_attr( get_bloginfo( 'name', 'display' ) ) .'" rel="home"><img src="'.$path_to_plugin_uri.'/assets/media/logo-white-326x86.png" alt="Litton Fine Camera Bags" /></a>
       <!--<button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="fa fa-times"></i></button>-->
 
       <ul class="checkout-tabs">
