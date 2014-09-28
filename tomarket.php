@@ -423,14 +423,59 @@ function set_easypost_api_key() {
   return $stripe_api_key;
 }
 
-// Verify Checkout Charge Amount
-// @desc  A helper function to ensure no one is affecting prices
-//        at checkout.
-// @param basketitems object An object containing basket items and qty
-//        as members.
-function verify_checkout_charge_amount( $basketitems ) {
-  // # Retrieve submitted cart contents (sku + qty)
+
+
+/**
+ * Calculate hand basket cost
+ *
+ * Calculate true product cost based on
+ * server-side calculations.
+ *
+ * @param   $handbasket array The contents of the handbasket
+ * @return  Array of totals
+ * @since 1.2.0
+ */
+function handbasket_totals( $handbasket ) {
+  // Determine True Cost of Basket
+  $subtotal = 0;
+  foreach ( $handbasket as $sku => $data ) {
+    $post_id = $data['post_id'];
+    if ( have_rows('product_skus', $post_id ) ) {
+      while ( have_rows('product_skus', $post_id) ) : the_row();
+        // if the sku matches the current product
+        if ( get_sub_field('sku') === $sku ) {
+          $subtotal = $subtotal + ( get_sub_field('sku_price') * $data['product_qty'] );
+        }
+      endwhile;
+    } else {
+      // Exit and send message back (someone fucking with the system)
+    }
+  }
+  $taxtotal = $subtotal * get_field( 'tax_rate', 'option' );
+  $grandtotal = floor( ($subtotal + $taxtotal) );
+
+  // Construct return array
+  $handbasket_totals = array();
+  $handbasket_totals['taxtotal'] = $taxtotal;
+  $handbasket_totals['subtotal'] = $subtotal;
+  $handbasket_totals['grandtotal'] = $grandtotal;
+
+  return $handbasket_totals;
 }
+
+/**
+ * Convert cents to dollars
+ *
+ * @param  $cents int Amount in cents
+ * @return int Amount in dollars
+ * @since 1.2.0
+ */
+function cents_to_dollars( $cents ) {
+  $dollars = number_format( $cents / 100, 2, '.', '');
+  return $dollars;
+}
+
+
 
 /**
  * Process Checkout
@@ -445,8 +490,8 @@ function process_checkout() {
     // Setup Data
     $basicinfo = $_REQUEST['basicinfo'];
     $shippingaddress = $_REQUEST['shippingaddress'];
-    $stripetoken = $_REQUEST['stripetoken'];
     $basketcontents = $_REQUEST['basketcontents'];
+    $stripetoken = $_REQUEST['stripetoken'];
     $orderNumber = generateRandomOrderNumber( 10 ); // generate random order number
 
     // Determine True Cost of Basket
@@ -630,9 +675,6 @@ function process_checkout() {
 add_action('wp_ajax_nopriv_process_checkout', 'process_checkout');
 add_action('wp_ajax_process_checkout', 'process_checkout');
 
-
-
-
 /**
  * PayPal
  * @since 1.2.0
@@ -667,48 +709,47 @@ function paypal_prepare_payment() {
   $payer = new Payer();
   $payer->setPaymentMethod("paypal");
 
+  // ### Load customer and cart info
+  //     Retrieve information about the customer and the cart and
+  //     prepare to send data to PayPal
+  $basicinfo = $_REQUEST['basicinfo'];
+  $shippingaddress = $_REQUEST['shippingaddress'];
+  $basketcontents = $_REQUEST['basketcontents'];
+
   // ### Itemized information
-  // (Optional) Lets you specify item wise
-  // information
-
-  // // Determine True Cost of Basket
-  // $subtotal = 0;
-  // foreach ( $basketcontents as $sku => $data ) {
-  //   $post_id = $data['post_id'];
-  //   if ( have_rows('product_skus', $post_id ) ) {
-  //     while ( have_rows('product_skus', $post_id) ) : the_row();
-  //       // if the sku matches the current product
-  //       if ( get_sub_field('sku') === $sku ) {
-  //         $subtotal = $subtotal + ( get_sub_field('sku_price') * $data['product_qty'] );
-  //       }
-  //     endwhile;
-  //   } else {
-  //     // Exit and send message back (someone fucking with the system)
-  //   }
-  // }
-
-  $item1 = new Item();
-  $item1->setName('Ground Coffee 40 oz')
-  	->setCurrency('USD')
-  	->setQuantity(1)
-  	->setPrice('7.50');
-  $item2 = new Item();
-  $item2->setName('Granola bars')
-  	->setCurrency('USD')
-  	->setQuantity(5)
-  	->setPrice('2.00');
+  $itemListObjects = array(); // An array of itemized information
+  foreach ( $basketcontents as $sku => $data ) {
+    $post_id = $data['post_id'];
+    if ( have_rows('product_skus', $post_id ) ) {
+      while ( have_rows('product_skus', $post_id) ) : the_row();
+        // Information about the current sku
+        if ( get_sub_field('sku') === $sku ) {
+          // get_sub_field('sku_price')
+          $item = new Item();
+          $item->setName( get_the_title($post_id) )
+            ->setCurrency('USD')
+            ->setQuantity( $data['product_qty'] )
+            ->setPrice( cents_to_dollars( get_sub_field('sku_price') ) );
+        }
+      endwhile;
+    }
+    $itemListObjects[] = $item;
+  }
 
   $itemList = new ItemList();
-  $itemList->setItems(array($item1, $item2));
+  $itemList->setItems( $itemListObjects );
+  $handbasket_totals = handbasket_totals( $basketcontents );
 
-  // ### Additional payment details
+  ### Additional payment details
   // Use this optional field to set additional
   // payment information such as tax, shipping
   // charges etc.
   $details = new Details();
-  $details->setShipping('1.20')
-  	->setTax('1.30')
-  	->setSubtotal('17.50');
+  $details->setShipping( '0.00' )
+  	// ->setTax( '0.00' )
+    // ->setSubtotal( '1125.00' );
+    ->setTax( cents_to_dollars( $handbasket_totals['taxtotal'] ) )
+  	->setSubtotal( cents_to_dollars( $handbasket_totals['subtotal'] ) );
 
   // ### Amount
   // Lets you specify a payment amount.
@@ -716,7 +757,8 @@ function paypal_prepare_payment() {
   // such as shipping, tax.
   $amount = new Amount();
   $amount->setCurrency("USD")
-  	->setTotal("20.00")
+  	//->setTotal( '20.00' )
+    ->setTotal( cents_to_dollars( $handbasket_totals['grandtotal'] ) )
   	->setDetails($details);
 
   // ### Transaction
@@ -785,7 +827,6 @@ function paypal_prepare_payment() {
   // 	exit;
   // }
 
-
   $paypalRedirectURL = $redirectUrl;
   $success = true;
   error_log($paypalRedirectURL);
@@ -800,5 +841,53 @@ function paypal_prepare_payment() {
 }
 add_action( 'wp_ajax_nopriv_paypal_prepare_payment', 'paypal_prepare_payment' );
 add_action( 'wp_ajax_paypal_prepare_payment', 'paypal_prepare_payment' );
+
+// PayPal todos
+// @todo compartmentalize easypost
+// @todo ensure paypal payment gets processed
+
+// #Execute Payment Sample
+// This sample shows how you can complete
+// a payment that has been approved by
+// the buyer by logging into paypal site.
+// You can optionally update transaction
+// information by passing in one or more transactions.
+// API used: POST '/v1/payments/payment/<payment-id>/execute'.
+
+use PayPal\Api\ExecutePayment;
+use PayPal\Api\PaymentExecution;
+if ( isset( $_GET['success'] ) && $_GET['success'] == 'true' ) {
+
+  //require __DIR__ . '/bootstrap.php';
+  require dirname( __FILE__ ) . '/lib/PayPal/bootstrap.php';
+  session_start();
+
+  // Get the payment Object by passing paymentId
+  // payment id was previously stored in session in
+  // CreatePaymentUsingPayPal.php
+  $paymentId = $_SESSION['paymentId'];
+  $payment = Payment::get($paymentId, $apiContext);
+
+  // PaymentExecution object includes information necessary
+  // to execute a PayPal account payment.
+  // The payer_id is added to the request query parameters
+  // when the user is redirected from paypal back to your site
+  $execution = new PaymentExecution();
+  $execution->setPayerId($_GET['PayerID']);
+
+  // # Execute the payment
+  // Let's not show private information
+  // (See bootstrap.php for more on `ApiContext`)
+  // $result = $payment->execute($execution, $apiContext);
+
+  // # Show success box here
+  $redirect_url = get_home_url() . '?/checkout=yes&step=4';
+  header("Location: " . $redirect_url);
+  //header("Location: http://192.168.10.40/?payment=paid");
+  die();
+
+}
+
+
 
 ?>

@@ -252,7 +252,7 @@ jQuery( document ).ready( function($) {
 	 */
 
 	// # Checkout Testing Parameters
-	var allow_dev_inputs = false;
+	var allow_dev_inputs = true;
 	function insert_dev_inputs ( steps ) {
 		// Step "Basic"
 		function input_step_basic_dev_data() {
@@ -661,10 +661,40 @@ jQuery( document ).ready( function($) {
 	 */
 	$(document).on('click', '#checkout-with-paypal', function (){
 
+		// Basic Info (Used by multiple services)
+		var basic_info = convert_form_to_json( $('form#basic-info') );
+
+		// Shipping Address
+		// If shipping address is filled out, serialize data for processing.
+		// Convert serialized data to a json object for parsing later
+		var shipping_address = convert_form_to_json( $('form#shipping-address') );
+
+		// Billing Address
+		if ( $("#show-billing-address-fields").is(':checked') ) {
+			var billing_address = {};
+			$(document).find('form#billing-address input').each(function() {
+				var key = $(this).data('stripe');
+				billing_address[key] = $(this).val();
+			});
+		} else {
+			var billing_address = shipping_address;
+		}
+
+		// Basket Info
+		var basket_contents = {};
+		for ( i = 0; i < simpleStorage.index().length; i++ ) {
+			basket_contents[ simpleStorage.index()[i] ] = simpleStorage.get( simpleStorage.index()[i] );
+		}
+
 		$.post( to_market_scripts.ajaxurl, {
 			dataType: "jsonp",
 			action: 'paypal_prepare_payment',
 			nonce: to_market_scripts.nonce,
+			basicinfo: basic_info,
+			shippingaddress: shipping_address,
+			billingaddress: billing_address,
+			basketcontents: basket_contents,
+			redirectURL: document.URL,
 		}, function(response) {
 			if ( response.success === true ) {
 				console.log('asdf');
