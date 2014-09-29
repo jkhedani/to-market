@@ -401,6 +401,12 @@ function render_checkout() {
 }
 add_action('wp_footer','render_checkout');
 
+
+
+
+
+
+
 // # Stripe API
 function stripe_api_key( $type ) {
   if ( $type === 'secret' ) {
@@ -422,6 +428,11 @@ function set_easypost_api_key() {
   }
   return $stripe_api_key;
 }
+
+
+
+
+
 
 
 
@@ -474,6 +485,14 @@ function cents_to_dollars( $cents ) {
   $dollars = number_format( $cents / 100, 2, '.', '');
   return $dollars;
 }
+
+
+
+
+
+
+
+
 
 
 

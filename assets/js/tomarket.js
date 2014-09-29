@@ -380,10 +380,14 @@ jQuery( document ).ready( function($) {
 
 	});
 
-	// @event Restore scrolling functionality
+	// @event Modal finished closing events.
 	$(document).on( 'hidden.bs.modal', '#checkout', function() {
+		// Restore scrolling functionality
 		$('html').css( 'overflow-y', 'scroll' );
 		$('html').removeClass('fixed');
+		// Reload the page to remove any query string parameters
+		var current_url = document.location.origin + document.location.pathname; // without query string
+		window.location.href = current_url; // Reload!
 	});
 
 	// @event Add Hand Basket Items to Checkout
