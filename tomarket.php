@@ -499,6 +499,10 @@ function cents_to_dollars( $cents ) {
 /**
  * Process Checkout
  * @since 1.2.0
+ *
+ * @throws AddressInvalid (Admin email/customer message)
+ * @throws CardDeclined (Admin email/customer message)
+ * @throws ShippingLabelNotPrinted (Admin/Customer Email)
  */
 function process_checkout() {
 
@@ -639,7 +643,10 @@ function process_checkout() {
       // Send success emails!
       function set_html_content_type() { return 'text/html'; } // HTML set content type for sending html through WP_Mail
       add_filter( 'wp_mail_content_type', 'set_html_content_type' );
-			// ADMIN Email
+			$headers = 'From: Litton Bags <info@littonbags.com>' . "\r\n" .
+                 'Reply-To: info@littonbags.com' . "\r\n" .
+                 'X-Mailer: PHP/' . phpversion();
+      // ADMIN Email
 			$htmlMessage  = '<p><img src="'.get_stylesheet_directory_uri().'/images/logo.png" alt="Litton Fine Camera Bags" /></p>';
 			$htmlMessage .=	'<p>Order Number: #'.$orderNumber.'</p>';
 			$htmlMessage .=	'<p>New product(s) await to be shipped: </p>';
@@ -651,24 +658,25 @@ function process_checkout() {
       // Send to all admins.
       if ( ! explode(", ", get_field('admin_email_address')) ) {
         $adminemail = get_field('admin_email_address');
-        wp_mail(  $adminemail, 'A New Product(s) Requires Shipping!', $htmlMessage );
+        wp_mail(  $adminemail, 'A New Product(s) Requires Shipping!', $htmlMessage, $headers );
       } else {
         $adminemails = explode(", ", get_field('admin_email_address'));
         foreach ( $adminemails as $adminemail ){
-          wp_mail(  $adminemail, 'A New Product(s) Requires Shipping!', $htmlMessage );
+          wp_mail(  $adminemail, 'A New Product(s) Requires Shipping!', $htmlMessage, $headers );
         }
       }
 
 			// CUSTOMER Email
 			$customerEmail = strip_tags( trim( $basicinfo['customer-email'] ) );
-			$htmlMessage  = '<p><img src="'.get_stylesheet_directory_uri().'/images/logo.png" alt="Litton Fine Camera Bags" /></p>';
-		  $htmlMessage .= '<p>Order Number: #'.$orderNumber.'</p>';
+			$htmlMessage   = '<p><img src="'.get_stylesheet_directory_uri().'/images/logo.png" alt="Litton Fine Camera Bags" /></p>';
+		  $htmlMessage  .= get_field('payment_successful_message', 'option');
+      $htmlMessage  .= '<p>Order Number: #'.$orderNumber.'</p>';
       foreach ($shipmentLabels as $shipmentLabel) {
         //error_log($shipmentLabel);
         $htmlMessage .= '<p>'.$shipmentLabel->rates[0]->carrier.' Tracking Number: #'.$shipmentLabel->tracking_code.'</p>';
       }
 			$htmlMessage .= '<p>Product details: '.$desc.'</p>';
-			wp_mail( $customerEmail, 'Thanks for shopping at Litton Bags!', $htmlMessage );
+			wp_mail( $customerEmail, 'Thanks for shopping at Litton Bags!', $htmlMessage, $headers );
 			remove_filter( 'wp_mail_content_type', 'set_html_content_type' ); // Reset content-type to avoid conflicts -- http://core.trac.wordpress.org/ticket/23578
 
     } catch( Exception $e ) {
