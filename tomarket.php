@@ -679,13 +679,58 @@ function process_checkout() {
 			wp_mail( $customerEmail, 'Thanks for shopping at Litton Bags!', $htmlMessage, $headers );
 			remove_filter( 'wp_mail_content_type', 'set_html_content_type' ); // Reset content-type to avoid conflicts -- http://core.trac.wordpress.org/ticket/23578
 
+      // Deduct product quantity
+      // Retrieve current count of product
+      // Subtract count by quanity
+      // Write quantity back to field
+      foreach ( $basketcontents as $sku => $data ) {
+        $post_id = $data['post_id'];
+        if ( have_rows('product_skus', $post_id ) ) {
+          while ( have_rows('product_skus', $post_id) ) : the_row();
+            // if the sku matches the current product
+            if ( get_sub_field('sku') === $sku ) {
+              $sku_object   = get_sub_field_object('sku');
+              $sku_quantity = get_sub_field('sku_quantity');
+              $quantity_purchased = $data['product_qty'];
+              $sku_quantity = $sku_quantity - $quantity_purchased;
+              // error_log(  print_r(get_sub_field_object('sku_quantity'),true));
+              // error_log( $sku_object['key'] . ',' . $sku_quantity . ',' . $post_id);
+              //update_field( $sku_object['key'], $value, $post_id );
+              //update_post_meta( $post_id, $sku_object['key'], $sku_quantity );
+            }
+          endwhile;
+        } else {
+          // Exit and send message back (someone fucking with the system)
+        }
+      }
+
     } catch( Exception $e ) {
       error_log($shipment->postage_label->label_url);
       error_log($e->getMessage());
-      // Change email messages here.
-        // One email to litton notifying her shipping label not printed.
-        // One email to customer letting them know product will be shipped
-        // ASAP and a tracking number will be emailed as well.
+
+      function set_html_content_type() { return 'text/html'; } // HTML set content type for sending html through WP_Mail
+      add_filter( 'wp_mail_content_type', 'set_html_content_type' );
+      $headers = 'From: Litton Bags <info@littonbags.com>' . "\r\n" .
+                 'Reply-To: info@littonbags.com' . "\r\n" .
+                 'X-Mailer: PHP/' . phpversion();
+
+      // CUSTOMER Email
+      $customerEmail = strip_tags( trim( $basicinfo['customer-email'] ) );
+      $htmlMessage   = '<p><img src="'.get_stylesheet_directory_uri().'/images/logo.png" alt="Litton Fine Camera Bags" /></p>';
+      $htmlMessage  .= get_field('shipping_not_printed', 'option');
+      $htmlMessage  .= '<p>Order Number: #'.$orderNumber.'</p>';
+      $htmlMessage .= '<p>Product details: '.$desc.'</p>';
+      wp_mail( $customerEmail, 'Thanks for shopping at Litton Bags!', $htmlMessage, $headers );
+
+      // ADMIN Email
+      $htmlMessage  = '<p><img src="'.get_stylesheet_directory_uri().'/images/logo.png" alt="Litton Fine Camera Bags" /></p>';
+      $htmlMessage .= '<p>Please verify that a shipment has been made';
+      $htmlMessage .=	'<p>Order Number: #'.$orderNumber.'</p>';
+      $htmlMessage .=	'<p>New product(s) await to be shipped: </p>';
+      $htmlMessage .= '<p>Product details: '.$desc.'</p><p>Note: It may be beneficial if you verify this purchase at your <a href="https://manage.stripe.com">Stripe Dashboard</a> :)</p>';
+      wp_mail(  $adminemail, 'A Payment has been made but requires shipping!', $htmlMessage, $headers );
+      // Reset content-type to avoid conflicts -- http://core.trac.wordpress.org/ticket/23578
+      remove_filter( 'wp_mail_content_type', 'set_html_content_type' );
     }
 
     // Send the user back no matter what! (even if easypost fails to generate label)
